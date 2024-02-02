@@ -8,7 +8,7 @@ import json
 import csv
 import Obs_Avoid_Module
 import Fence_Module
-import robenuav
+import utils
 
 class automission(object):
     # docstring for automission
@@ -118,25 +118,25 @@ def save_mission(aFileName): #Save a mission in the Waypoint file format
         file_.write(output)
 
 def take_off_sequence():
-    brng = robenuav.myUav.main_bearing
-    take_off_lat, take_off_long = robenuav.new_waypoint(home_lat, home_long, 1, brng)
-    cmd_takeoff = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, robenuav.myUav.takeoff_angle, 0, 0, 0, take_off_lat, take_off_long, robenuav.myUav.takeoff_alt)
+    brng = utils.myUav.main_bearing
+    take_off_lat, take_off_long = utils.new_waypoint(home_lat, home_long, 1, brng)
+    cmd_takeoff = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, utils.myUav.takeoff_angle, 0, 0, 0, take_off_lat, take_off_long, utils.myUav.takeoff_alt)
     cmds.add(cmd_takeoff)
 
 
 def landing_sequence(): #Create Landing Sequence
-    brng = robenuav.myUav.main_bearing  # Bearing Angle in degrees
+    brng = utils.myUav.main_bearing  # Bearing Angle in degrees
     start_land_dist = 100
     loiter_alt = 20
     loiter_rad = 50
-    loiter_lat,loiter_long = robenuav.new_waypoint(home_lat,home_long,start_land_dist,brng-180)
+    loiter_lat,loiter_long = utils.new_waypoint(home_lat,home_long,start_land_dist,brng-180)
     cmd_loiter = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LOITER_TO_ALT, 0, 0, 0, loiter_rad, 0, 0, loiter_lat, loiter_long, loiter_alt)
     cmd_land = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 0, 0, 0, 0, 0, home_lat, home_long, 0)
     cmds.add(cmd_loiter)
     cmds.add(cmd_land)
 
 # Upload Geofence
-Fence_Module.uploadfence(robenuav.myUav.fence_file)
+Fence_Module.uploadfence(utils.myUav.fence_file)
 
 # Use UDP to connect to the SITL simulator through the local port 14551
 connection_string ='127.0.0.1:14551' #'tcp:127.0.0.1:5760'  #
@@ -145,16 +145,16 @@ print('Connecting to vehicle on: %s' % connection_string)
 vehicle = connect(connection_string, wait_ready=True)
 
 my_mission = automission('plane')
-wp_file = robenuav.myUav.waypoints_file + '.csv'
+wp_file = utils.myUav.waypoints_file + '.csv'
 try:
     with open(wp_file) as file:
         print("\nWaypoints file available")
         if os.stat(wp_file).st_size == 0:
             print("No Waypoints in file")
         else:
-            WpsList, WpsNo = robenuav.FileList(robenuav.myUav.waypoints_file)
+            WpsList, WpsNo = utils.FileList(utils.myUav.waypoints_file)
             for x in range(WpsNo+1):
-                LatA, LongA, AltA = robenuav.Waypoint_Coordinates(x, WpsList) #get coordinates of first waypoint
+                LatA, LongA, AltA = utils.Waypoint_Coordinates(x, WpsList) #get coordinates of first waypoint
                 my_mission.waypoint(LatA, LongA, AltA)
             my_mission.write()
     waypoints_file = "Waypointsedited"
@@ -172,7 +172,7 @@ home_lat = home.lat
 home_long = home.lon
 home_ASL = home.alt
 
-waypoints_file = Obs_Avoid_Module.obstacle_avoidance(waypoints_file, robenuav.myUav.obstacles_file)
+waypoints_file = Obs_Avoid_Module.obstacle_avoidance(waypoints_file, utils.myUav.obstacles_file)
 
 import_mission_filename = waypoints_file + '.txt'
 export_mission_filename = 'Exported_Mission.txt'
@@ -194,4 +194,4 @@ time.sleep(5) #delay 5s
 
 vehicle.close() #Before exiting, clear the vehicle object
 
-robenuav.printfile(export_mission_filename)
+utils.printfile(export_mission_filename)

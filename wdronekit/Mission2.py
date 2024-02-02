@@ -8,7 +8,7 @@ import json
 import csv
 import Obs_Avoid_Module
 import Fence_Module
-import robenuav
+import utils
 
 class automission(object):
     # docstring for automission
@@ -118,18 +118,18 @@ def save_mission(aFileName): #Save a mission in the Waypoint file format
         file_.write(output)
 
 def take_off_sequence():
-    brng = robenuav.myUav.main_bearing
-    take_off_lat, take_off_long = robenuav.new_waypoint(home_lat, home_long, 1, brng)
-    cmd_takeoff = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, robenuav.myUav.takeoff_angle, 0, 0, 0, take_off_lat, take_off_long, robenuav.myUav.takeoff_alt)
+    brng = utils.myUav.main_bearing
+    take_off_lat, take_off_long = utils.new_waypoint(home_lat, home_long, 1, brng)
+    cmd_takeoff = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, utils.myUav.takeoff_angle, 0, 0, 0, take_off_lat, take_off_long, utils.myUav.takeoff_alt)
     cmds.add(cmd_takeoff)
 
 
 def landing_sequence(): #Create Landing Sequence
-    brng = robenuav.myUav.main_bearing  # Bearing Angle in degrees
+    brng = utils.myUav.main_bearing  # Bearing Angle in degrees
     start_land_dist = 100
     loiter_alt = 20
     loiter_rad = 50
-    loiter_lat,loiter_long = robenuav.new_waypoint(home_lat,home_long,start_land_dist,brng-180)
+    loiter_lat,loiter_long = utils.new_waypoint(home_lat,home_long,start_land_dist,brng-180)
     cmd_loiter = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LOITER_TO_ALT, 0, 0, 0, loiter_rad, 0, 0, loiter_lat, loiter_long, loiter_alt)
     cmd_land = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 0, 0, 0, 0, 0, home_lat, home_long, 0)
     cmds.add(cmd_loiter)
@@ -185,13 +185,13 @@ def airdrop_off(waypoints_file,payloads_file):
         d_wp = 60
         drop_alt = 60
         altwp = 70
-        Lat_drop,Long_drop = robenuav.new_waypoint(LatPL,LongPL,d_drop,brng)
-        wp2_lat,wp2_long = robenuav.new_waypoint(Lat_drop,Long_drop,d_wp,brng-180)
-        wp1_lat,wp1_long = robenuav.new_waypoint(Lat_drop,Long_drop,d_wp,brng)
+        Lat_drop,Long_drop = utils.new_waypoint(LatPL,LongPL,d_drop,brng)
+        wp2_lat,wp2_long = utils.new_waypoint(Lat_drop,Long_drop,d_wp,brng-180)
+        wp1_lat,wp1_long = utils.new_waypoint(Lat_drop,Long_drop,d_wp,brng)
 
         cmd1 = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, wp1_lat, wp1_long, altwp)
         cmd_drop = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, Lat_drop, Long_drop, drop_alt)
-        cmd_drop_servo = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 0, robenuav.myUav.Servo_No, robenuav.myUav.PWM_value, 0, 0, Lat_drop, Long_drop, drop_alt)
+        cmd_drop_servo = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 0, utils.myUav.Servo_No, utils.myUav.PWM_value, 0, 0, Lat_drop, Long_drop, drop_alt)
         cmd2 = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, wp2_lat, wp2_long, altwp)
 
         cmds.add(cmd1)
@@ -199,18 +199,18 @@ def airdrop_off(waypoints_file,payloads_file):
         cmds.add(cmd_drop_servo)
         cmds.add(cmd2)
 
-    drop_x, drop_y = robenuav.payload_drop_eq (robenuav.myUav.H1, robenuav.myUav.Vpa, robenuav.myUav.Vag, robenuav.myUav.angle)
+    drop_x, drop_y = utils.payload_drop_eq (utils.myUav.H1, utils.myUav.Vpa, utils.myUav.Vag, utils.myUav.angle)
 
-    WpsList, WpsNo = robenuav.WP_FileList(waypoints_file)
+    WpsList, WpsNo = utils.WP_FileList(waypoints_file)
 
     file_path = payloads_file + '.csv'
     try:
         with open(file_path) as file:
             print("\nPayloads file available")
             if os.stat(file_path).st_size != 0:
-                PL_List, PL_No = robenuav.FileList(payloads_file)
+                PL_List, PL_No = utils.FileList(payloads_file)
                 for x in range (PL_No + 1):
-                    PL_Lat, PL_Long = robenuav.Air_Drop_and_fence_Coordinates(x, PL_List)
+                    PL_Lat, PL_Long = utils.Air_Drop_and_fence_Coordinates(x, PL_List)
                     add_drop_waypoints(PL_Lat, PL_Long, drop_x)
 
 
@@ -221,7 +221,7 @@ def airdrop_off(waypoints_file,payloads_file):
 
 def image_coordinates():
     pixelFile = "Pixels"
-    p2List, p2No = robenuav.FileList(pixelFile)
+    p2List, p2No = utils.FileList(pixelFile)
     with open("Geoloc.txt",'a') as f:
         f.seek(0)
         for x in range(p2No+1):
@@ -278,7 +278,7 @@ def image_coordinates():
             bearing = 0
             Angle = bearing - angle
 
-            image_x2, image_y2 = robenuav.new_waypoint(lat1, long1, distance, Angle)
+            image_x2, image_y2 = utils.new_waypoint(lat1, long1, distance, Angle)
 
             f.truncate()
             f.write(str(image_x2))
@@ -287,7 +287,7 @@ def image_coordinates():
             f.write("\n")
 
 # Upload Geofence
-Fence_Module.uploadfence(robenuav.myUav.fence_file)
+Fence_Module.uploadfence(utils.myUav.fence_file)
 
 # Use UDP to connect to the SITL simulator through the local port 14551
 connection_string ='127.0.0.1:14551' #'tcp:127.0.0.1:5760'  #
@@ -296,16 +296,16 @@ print('Connecting to vehicle on: %s' % connection_string)
 vehicle = connect(connection_string, wait_ready=True)
 
 my_mission = automission('plane')
-wp_file = robenuav.myUav.waypoints_file + '.csv'
+wp_file = utils.myUav.waypoints_file + '.csv'
 try:
     with open(wp_file) as file:
         print("\nWaypoints file available")
         if os.stat(wp_file).st_size == 0:
             print("No Waypoints in file")
         else:
-            WpsList, WpsNo = robenuav.FileList(robenuav.myUav.waypoints_file)
+            WpsList, WpsNo = utils.FileList(utils.myUav.waypoints_file)
             for x in range(WpsNo+1):
-                LatA, LongA, AltA = robenuav.Waypoint_Coordinates(x, WpsList) #get coordinates of first waypoint
+                LatA, LongA, AltA = utils.Waypoint_Coordinates(x, WpsList) #get coordinates of first waypoint
                 my_mission.waypoint(LatA, LongA, AltA)
             my_mission.write()
     waypoints_file = "Waypointsedited"
@@ -323,9 +323,9 @@ home_lat = home.lat
 home_long = home.lon
 home_ASL = home.alt
 
-waypoints_file = Obs_Avoid_Module.obstacle_avoidance(waypoints_file, robenuav.myUav.obstacles_file)
+waypoints_file = Obs_Avoid_Module.obstacle_avoidance(waypoints_file, utils.myUav.obstacles_file)
 
-waypoints_file = add_survey(waypoints_file,robenuav.myUav.grid_file)
+waypoints_file = add_survey(waypoints_file,utils.myUav.grid_file)
 
 import_mission_filename = waypoints_file + '.txt'
 export_mission_filename = 'Exported_Mission.txt'
@@ -337,7 +337,7 @@ upload_mission(import_mission_filename) #Upload mission from file
 
 image_coordinates()
 
-airdrop_off(waypoints_file,robenuav.myUav.payloads_file)
+airdrop_off(waypoints_file,utils.myUav.payloads_file)
 
 landing_sequence()
 cmds.upload()  # Send commands
@@ -348,4 +348,4 @@ time.sleep(5) #delay 5s
 
 vehicle.close() #Before exiting, clear the vehicle object
 
-robenuav.printfile(export_mission_filename)
+utils.printfile(export_mission_filename)

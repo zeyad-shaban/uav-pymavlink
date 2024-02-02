@@ -2,7 +2,7 @@ import math
 import os
 import json
 import csv
-import robenuav
+import robenuav as utils
 
 def obstacle_avoidance(waypoints_file, obstacles_file):
     #waypoints_file = 'Waypoints'
@@ -54,17 +54,17 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
         print("\n")
         for y in range(ObsNo + 1):
             if y != yy:
-                ObsLat, ObsLong, ObsRad = robenuav.Obstacle_Coordinates_Radius(y, ObsList)
+                ObsLat, ObsLong, ObsRad = utils.Obstacle_Coordinates_Radius(y, ObsList)
                 ObsRad = float(ObsRad)
-                dAB = robenuav.distance(x1, y1, x2, y2)  #total distance from A to B
-                dAob = robenuav.distance(x1, y1, ObsLat, ObsLong)  #distance from A to Obstacle
-                dobB = robenuav.distance(ObsLat, ObsLong, x2, y2)  #distance from Obstacle to B
-                brngAB = robenuav.get_bearing(x1, y1, x2, y2)   #bearing between A and B
+                dAB = utils.distance(x1, y1, x2, y2)  #total distance from A to B
+                dAob = utils.distance(x1, y1, ObsLat, ObsLong)  #distance from A to Obstacle
+                dobB = utils.distance(ObsLat, ObsLong, x2, y2)  #distance from Obstacle to B
+                brngAB = utils.get_bearing(x1, y1, x2, y2)   #bearing between A and B
                 brngBA = brngAB - 180   #bearing between B and A
                 brngobs = brngAB - 90   #bearing of obs (perpendicular to AB bearing)
-                brngAob = robenuav.get_bearing(x1, y1, ObsLat, ObsLong) #bearing between A and Obstacle
-                brngobA = robenuav.get_bearing(ObsLat, ObsLong, x1, y1)  #bearing between Obstacle and A
-                brngobB = robenuav.get_bearing(ObsLat, ObsLong, x2, y2)  #bearing between Obstacle and B
+                brngAob = utils.get_bearing(x1, y1, ObsLat, ObsLong) #bearing between A and Obstacle
+                brngobA = utils.get_bearing(ObsLat, ObsLong, x1, y1)  #bearing between Obstacle and A
+                brngobB = utils.get_bearing(ObsLat, ObsLong, x2, y2)  #bearing between Obstacle and B
 
                 if brngAB > brngAob:
                     brng = brngAB - brngAob
@@ -73,7 +73,7 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
 
                 L = dAob * math.sin(brng*(math.pi/180))
 
-                if (brng <= 270 and brng >= 90 ) or (L >= (robenuav.myUav.safe_dist * ObsRad)) or (dAob > dAB):
+                if (brng <= 270 and brng >= 90 ) or (L >= (utils.myUav.safe_dist * ObsRad)) or (dAob > dAB):
                     print("re Obs",y,"--> No Effect")
 
                 else:
@@ -83,9 +83,9 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
                     continue
 
     def add_avoid_waypoint(LatA, LongA, AltA, LatB, LongB, AltB, ObsLat, ObsLong, ObsRad, brngobs, y):
-        dObs = ObsRad * robenuav.myUav.safe_dist
-        d1safe = ObsRad * robenuav.myUav.safe_dist #Safety Distance
-        d2safe = ObsRad * robenuav.myUav.safe_dist
+        dObs = ObsRad * utils.myUav.safe_dist
+        d1safe = ObsRad * utils.myUav.safe_dist #Safety Distance
+        d2safe = ObsRad * utils.myUav.safe_dist
 
         '''
         if (d1safe < dAob):
@@ -96,7 +96,7 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
             y1 = LongB
         '''
 
-        x2, y2 = robenuav.new_waypoint(ObsLat, ObsLong, dObs, brngobs)
+        x2, y2 = utils.new_waypoint(ObsLat, ObsLong, dObs, brngobs)
         #check_2nd_time(x1, y1, AltA, x2, y2, AltA, y)
         check_2nd_time(LatA, LongA, AltA, x2, y2, AltA, y)
         my_mission.waypoint(x2, y2, AltA)
@@ -110,7 +110,7 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
             '''
 
     my_mission = automission('plane')
-    WpsList, WpsNo = robenuav.WP_FileList(waypoints_file)
+    WpsList, WpsNo = utils.WP_FileList(waypoints_file)
 
     file_path = obstacles_file + '.csv'
     try:
@@ -118,10 +118,10 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
             print("\nObsatcles file available")
             if os.stat(file_path).st_size == 0:
                 for x in range(WpsNo+1):
-                    LatA, LongA, AltA = robenuav.Waypoint_Coordinates_txt(x, WpsList) #get coordinates of first waypoint
+                    LatA, LongA, AltA = utils.Waypoint_Coordinates_txt(x, WpsList) #get coordinates of first waypoint
                     my_mission.waypoint(LatA, LongA, AltA)
             else:
-                ObsListo, ObsNoo = robenuav.FileList(obstacles_file)
+                ObsListo, ObsNoo = utils.FileList(obstacles_file)
                 #Create new obstacle file to add obstacles with close proximity to each other as one
                 with open(obstacles_file + 'edited.csv', "a+") as f:
                     f.seek(0) #point at beginning of file
@@ -132,18 +132,18 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
                         if flag == 1:
                             flag = 0 #reintialize the flag to zero after adding past obstacles
                             continue
-                        ObsN, ObsLat, ObsLong, ObsRad = robenuav.Obstacle_Coordinates_Radius(i, ObsListo) #get fist obstacle's lat,long and radius
+                        ObsN, ObsLat, ObsLong, ObsRad = utils.Obstacle_Coordinates_Radius(i, ObsListo) #get fist obstacle's lat,long and radius
                         ObsRad = float(ObsRad)
 
-                        ObsN2, ObsLat2, ObsLong2, ObsRad2 = robenuav.Obstacle_Coordinates_Radius(i+1, ObsListo) #get second obstacle's lat,long and radius
+                        ObsN2, ObsLat2, ObsLong2, ObsRad2 = utils.Obstacle_Coordinates_Radius(i+1, ObsListo) #get second obstacle's lat,long and radius
                         ObsRad2 = float(ObsRad2)
 
-                        d_ob1_ob2 = robenuav.distance(ObsLat, ObsLong, ObsLat2, ObsLong2) #distance between 2 obstacles
-                        brng_ob1_ob2 = robenuav.get_bearing(ObsLat, ObsLong, ObsLat2, ObsLong2) #bearing between 2 obstacles
+                        d_ob1_ob2 = utils.distance(ObsLat, ObsLong, ObsLat2, ObsLong2) #distance between 2 obstacles
+                        brng_ob1_ob2 = utils.get_bearing(ObsLat, ObsLong, ObsLat2, ObsLong2) #bearing between 2 obstacles
                         if d_ob1_ob2 <= 30: #if distance is less that 30 m
                             flag = flag + 1 #increment flag to indicate presence of 2 close obstacles
                             m_d_ob1_ob2 = d_ob1_ob2/2  #get midpoint between the radii of the 2 obstacles (to be the new obstacle midpoint)
-                            ObsLat_new, ObsLong_new = robenuav.new_waypoint(ObsLat, ObsLong, m_d_ob1_ob2, brng_ob1_ob2) #add new combined obstacle
+                            ObsLat_new, ObsLong_new = utils.new_waypoint(ObsLat, ObsLong, m_d_ob1_ob2, brng_ob1_ob2) #add new combined obstacle
                             ObsRad_new = ObsRad + ObsRad2 #new obstacle's radius as sum of both radii
                             #write new obstacle data to new file
                             f.write(str(ObsLat_new))
@@ -163,7 +163,7 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
                             f.write("\n")
 
                     #add last obstacle to new obstacle file
-                    ObsN, ObsLat, ObsLong, ObsRad = robenuav.Obstacle_Coordinates_Radius(ObsNoo, ObsListo)
+                    ObsN, ObsLat, ObsLong, ObsRad = utils.Obstacle_Coordinates_Radius(ObsNoo, ObsListo)
                     ObsRad = float(ObsRad)
                     f.write(str(ObsLat))
                     f.write(",")
@@ -171,27 +171,27 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
                     f.write(",")
                     f.write(str(ObsRad))
 
-                ObsList, ObsNo = robenuav.FileList(obstacles_file + 'edited')
+                ObsList, ObsNo = utils.FileList(obstacles_file + 'edited')
 
                 for x in range(WpsNo):
                     print("\n")
                     print("Between Wp",x,"and Wp",x+1)
-                    LatA, LongA, AltA = robenuav.Waypoint_Coordinates_txt(x, WpsList) #get coordinates of first waypoint
-                    LatB, LongB, AltB = robenuav.Waypoint_Coordinates_txt(x+1, WpsList) #get coordinates of first waypoint
+                    LatA, LongA, AltA = utils.Waypoint_Coordinates_txt(x, WpsList) #get coordinates of first waypoint
+                    LatB, LongB, AltB = utils.Waypoint_Coordinates_txt(x+1, WpsList) #get coordinates of first waypoint
 
                     my_mission.waypoint(LatA, LongA, AltA)
                     for y in range(ObsNo + 1):
-                        ObsN, ObsLat, ObsLong, ObsRad = robenuav.Obstacle_Coordinates_Radius(y, ObsList) #get obstacle's lat,long and radius
+                        ObsN, ObsLat, ObsLong, ObsRad = utils.Obstacle_Coordinates_Radius(y, ObsList) #get obstacle's lat,long and radius
                         ObsRad = float(ObsRad)
-                        dAB = robenuav.distance(LatA, LongA, LatB, LongB)  #total distance from A to B
-                        dAob = robenuav.distance(LatA, LongA, ObsLat, ObsLong)  #distance from A to Obstacle
-                        dobB = robenuav.distance(ObsLat, ObsLong, LatB, LongB)  #distance from Obstacle to B
-                        brngAB = robenuav.get_bearing(LatA, LongA, LatB, LongB) #bearing between A and B
+                        dAB = utils.distance(LatA, LongA, LatB, LongB)  #total distance from A to B
+                        dAob = utils.distance(LatA, LongA, ObsLat, ObsLong)  #distance from A to Obstacle
+                        dobB = utils.distance(ObsLat, ObsLong, LatB, LongB)  #distance from Obstacle to B
+                        brngAB = utils.get_bearing(LatA, LongA, LatB, LongB) #bearing between A and B
                         brngBA = brngAB - 180 #bearing between B and A
                         brngobs = brngAB - 90 #bearing of obs (perpendicular to AB bearing)
-                        brngAob = robenuav.get_bearing(LatA, LongA, ObsLat, ObsLong) #bearing between A and Obstacle
-                        brngobA = robenuav.get_bearing(ObsLat, ObsLong, LatA, LongA) #bearing between Obstacle and A
-                        brngobB = robenuav.get_bearing(ObsLat, ObsLong, LatB, LongB) #bearing between Obstacle and B
+                        brngAob = utils.get_bearing(LatA, LongA, ObsLat, ObsLong) #bearing between A and Obstacle
+                        brngobA = utils.get_bearing(ObsLat, ObsLong, LatA, LongA) #bearing between Obstacle and A
+                        brngobB = utils.get_bearing(ObsLat, ObsLong, LatB, LongB) #bearing between Obstacle and B
 
                         if brngAB > brngAob:
                             brng = brngAB - brngAob
@@ -200,7 +200,7 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
 
                         L = dAob * math.sin(brng*(math.pi/180))
 
-                        if (brng <= 270 and brng >= 90 ) or (L >= (robenuav.myUav.safe_dist * ObsRad)) or (dAob > dAB):
+                        if (brng <= 270 and brng >= 90 ) or (L >= (utils.myUav.safe_dist * ObsRad)) or (dAob > dAB):
                             print("Obs",y,"--> No Effect")
 
                         else:
@@ -211,7 +211,7 @@ def obstacle_avoidance(waypoints_file, obstacles_file):
     except FileNotFoundError:
         print("\nObstacles file is not available")
         for x in range(WpsNo+1):
-            LatA, LongA, AltA = robenuav.Waypoint_Coordinates_txt(x, WpsList) #get coordinates of first waypoint
+            LatA, LongA, AltA = utils.Waypoint_Coordinates_txt(x, WpsList) #get coordinates of first waypoint
             my_mission.waypoint(LatA, LongA, AltA)
     my_mission.write()
     return 'Waypoints+Obstacles'
