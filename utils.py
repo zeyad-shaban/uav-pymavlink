@@ -4,7 +4,7 @@ import numpy as np
 R = 6371000.0  # Earth radius in meters
 
 
-def readlatlong(path):
+def readlatlongFile(path):
     with open(path) as f:
         if not next(f).startswith("n,lat,long"):
             return print("File not supported (must be n,lat,long)")
@@ -17,7 +17,7 @@ def readlatlong(path):
         return cords
 
 
-def readlatlongalt(path):
+def readlatlongaltFile(path):
     with open(path) as f:
         firstLine = next(f)
         if not firstLine.startswith("n,lat,long,alt") and not firstLine.startswith("n,lat,long,radius"):
@@ -31,25 +31,12 @@ def readlatlongalt(path):
         return cords
 
 
-# todo replace the part below with built in math functions
-def Convert(lat, lon):  # Convert LAT & LONG from degree to radian
-    lat = float(lat) * math.pi / 180
-    lon = float(lon) * math.pi / 180
-    return lat, lon
-
-
-def ReConvert(lat, lon):  # Convert LAT & LONG from radian to degree
-    lat = float(lat) * 180 / math.pi
-    lon = float(lon) * 180 / math.pi
-    return lat, lon
-
-
 def new_waypoint(lat1, long1, d, brng):  # Calculate new waypoint using waypoint, distance and bearing
     brng = brng * (math.pi/180)
-    lat1_r, long1_r = Convert(lat1, long1)
+    lat1_r, long1_r = math.radians(lat1), math.radians(long1)
     lat2_r = math.asin(math.sin(lat1_r) * math.cos(d / R) + math.cos(lat1_r) * math.sin(d / R) * math.cos(brng))
     long2_r = long1_r + math.atan2((math.sin(brng) * math.sin(d / R) * math.cos(lat1_r)), (math.cos(d / R) - math.sin(lat1_r) * math.sin(lat2_r)))
-    lat2, long2 = ReConvert(lat2_r, long2_r)
+    lat2, long2 = math.degrees(lat2_r), math.degrees(long2_r)
     brng = brng * (180/math.pi)
     return lat2, long2
 
@@ -127,13 +114,13 @@ def getDistance2Points(lat1, lon1, lat2, lon2):
     a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
     c = 2 * math.asin(math.sqrt(a)) 
     km = 6371* c
-    return km
+    return km * 1000
 
-def wpAroundObstacle(wp, obs, safetyMargin, pointsCount):
-    bearing = math.atan2(obs[1] - wp[1], obs[0] - wp[0])
-    wps = []
-    for angle in np.linspace(0, 2*np.pi, num=pointsCount):
-        new_lat = obs[0] + (obs[2] + safetyMargin) * math.cos(angle + bearing)
-        new_lon = obs[1] + (obs[2] + safetyMargin) * math.sin(angle + bearing)
-        wps.append([new_lat, new_lon, wp[2]])
-    return wps
+def getBearing2Points(lat1, long1, lat2, long2):
+    lat1_r, long1_r = math.radians(lat1), math.radians(long1)
+    lat2_r, long2_r = math.radians(lat2), math.radians(long2)
+    y = math.sin(long2_r - long1_r) * math.cos(lat2_r)
+    x = math.cos(lat1_r) * math.sin(lat2_r) - math.sin(lat1_r) * math.cos(lat2_r) * math.cos(long2_r - long1_r)
+    i = math.atan2(y, x)
+    bearing = (i * 180 / math.pi + 360) % 360
+    return bearing

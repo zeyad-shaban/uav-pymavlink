@@ -24,7 +24,7 @@ FENCE_ACTION = "FENCE_ACTION".encode(encoding="utf8")
 PARAM_INDEX = -1
 
 # create fence item list
-fence_list = utils.readlatlong("Geofence.csv")
+fence_list = utils.readlatlongFile("Geofence.csv")
 # connect to vehicle
 
 vehicle = utility.mavlink_connection(device="udpin:127.0.0.1:14551")

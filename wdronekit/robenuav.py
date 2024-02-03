@@ -95,6 +95,7 @@ def Convert(lat, lon): #Convert LAT & LONG from degree to radian
     lon = float(lon) * math.pi / 180
     return lat, lon
 
+# ! THE EQUATION BELOW IS WRONG, 180 / MATH.PI IS NOT COVERED IN BRACKETS
 def ReConvert(lat, lon): #Convert LAT & LONG from radian to degree
     lat = float(lat) * 180 / math.pi
     lon = float(lon) * 180 / math.pi
