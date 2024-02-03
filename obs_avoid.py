@@ -83,32 +83,15 @@ else:
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             latA, longA, altA))
         check_2nd_time(latA, longA, altA, latB, longB, altB, None)
-        # for j, obs in enumerate(obsCords):
-        #     ObsLat, ObsLong, ObsRad = obs[0], obs[1], obs[2]
-        #     dAB = getDistance2Points(LatA, LongA, LatB, LongB)
-        #     dAob = getDistance2Points(LatA, LongA, ObsLat, ObsLong)
-        #     brngAB = getBearing2Points(LatA, LongA, LatB, LongB)
-        #     brngobs = brngAB - 90
-        #     brngAob = getBearing2Points(LatA, LongA, ObsLat, ObsLong)
-
-        #     if brngAB > brngAob:
-        #         brng = brngAB - brngAob
-        #     else:
-        #         brng = brngAob - brngAB
-
-        #     L = dAob * math.sin(brng*(math.pi/180))
-
-        #     if not ((brng <= 270 and brng >= 90) or (L >= (myUav.safe_dist * ObsRad)) or (dAob > dAB)):
-        #         add_avoid_waypoint(LatA, LongA, AltA, LatB, LongB, AltB, ObsLat, ObsLong, ObsRad, brngobs, j)
 
     wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
         master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
         latB, longB, altB))
 
 
-# master.waypoint_clear_all_send()
-# master.waypoint_count_send(wpLoader.count())
+master.waypoint_clear_all_send()
+master.waypoint_count_send(wpLoader.count())
 
-# for i in range(wpLoader.count()):
-#     msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
-#     master.mav.send(wpLoader.wp(msg.seq))
+for i in range(wpLoader.count()):
+    msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
+    master.mav.send(wpLoader.wp(msg.seq))
