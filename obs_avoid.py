@@ -1,4 +1,3 @@
-# TODO OPTIMIZE
 from pymavlink import mavutil, mavwp
 from utils import readlatlongaltFile, getDistance2Points, getBearing2Points, new_waypoint
 import math
