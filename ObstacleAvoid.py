@@ -14,18 +14,17 @@ master.wait_heartbeat()
 wpLoader = mavwp.MAVWPLoader()
 
 
-def obs_avoidance_module(wpPath, obsPath):
+def ObstacleAvoid(wpPath, obsPath):
     wpCords = readlatlongaltFile(wpPath)
     obsCords = readlatlongaltFile(obsPath)
+    newWaypoints = []
 
     def add_avoid_waypoint(latA, longA, altA, latB, longB, altB, obsLat, obsLong, obsRad, obsBearing, execludeObsI):
         dObs = obsRad * myUav.safe_dist
 
         latNew, longNew = new_waypoint(obsLat, obsLong, dObs, obsBearing)
         check_obstacles(latA, longA, altA, latNew, longNew, altA, execludeObsI)
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, execludeObsI, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            latNew, longNew, altA))
+        newWaypoints.append([latNew, longNew, altA])
         check_obstacles(latNew, longNew, altA, latB, longB, altB, execludeObsI)
 
     def check_obstacles(latA, longA, altA, latB, longB, altB, execludeObsI):
@@ -52,9 +51,7 @@ def obs_avoidance_module(wpPath, obsPath):
 
     if len(obsCords) == 0:
         for i, wp in enumerate(wpCords):
-            wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-                master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-                wp[0], wp[1], wp[2]))
+            newWaypoints.append([wp[0], wp[1], wp[2]])
 
     else:
         # combine close obstacles
@@ -78,14 +75,10 @@ def obs_avoidance_module(wpPath, obsPath):
             latA, longA, altA = wp[0], wp[1], wp[2]
             latB, longB, altB = nextWp[0], nextWp[1], nextWp[2]
 
-            wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-                master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-                latA, longA, altA))
+            newWaypoints.append([latA, longA, altA])
             check_obstacles(latA, longA, altA, latB, longB, altB, None)
 
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            latB, longB, altB))
+            newWaypoints.append([latB, longB, altB])
 
     master.waypoint_clear_all_send()
     master.waypoint_count_send(wpLoader.count())
@@ -93,3 +86,5 @@ def obs_avoidance_module(wpPath, obsPath):
     for i in range(wpLoader.count()):
         msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
         master.mav.send(wpLoader.wp(msg.seq))
+
+    return newWaypoints
