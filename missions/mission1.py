@@ -1,6 +1,7 @@
 from pymavlink import mavutil, mavwp
 from modules.utils import new_waypoint, readlatlongFile, payload_drop_eq, addHome, takeoffSequence, landingSequence
 from modules.ObstacleAvoid import ObstacleAvoid
+# from modules.Fence import uploadFence
 
 
 def startMission(uav, connectionString):
@@ -51,18 +52,13 @@ def startMission(uav, connectionString):
                 msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
                 master.mav.send(wpLoader.wp(msg.seq))
 
-
     home = addHome(master)
     takeoffSequence(master, wpLoader, home, uav)
 
     wpCords = ObstacleAvoid(uav, './data/Waypoints.csv', './data/Obstacles.csv')
     for i, cord in enumerate(wpCords):
-        cmd = mavutil.mavlink.MAV_CMD_NAV_WAYPOINT
-        if i == 1:
-            cmd = mavutil.mavlink.MAV_CMD_NAV_TAKEOFF
-
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, cmd, 0, 1, 0, 0, 0, 0,
+            master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             cord[0], cord[1], cord[2]))
 
     landingSequence(master, wpLoader, home, uav)

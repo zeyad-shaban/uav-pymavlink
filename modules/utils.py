@@ -140,13 +140,13 @@ def getBearing2Points(lat1, long1, lat2, long2):
     bearing = (i * 180 / math.pi + 360) % 360
     return bearing
 
-def addHome(master):
+def addHome(master, wpLoader):
     msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
     home = [msg.lat / 1e7, msg.lon / 1e7]
 
-    mavutil.mavlink.MAVLink_mission_item_message(
+    wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
         master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-        home[0], home[1], 0)
+        home[0], home[1], 0))
 
     return home
 
