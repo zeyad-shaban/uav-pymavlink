@@ -35,12 +35,12 @@ def writeMissionPlannerFile(wpCords, path):
     with open(path, 'w') as f:
         f.write("QGC WPL 110\n")
         for i, cord in enumerate(wpCords):
+            cmd = 16
             if i == 1:
                 cmd = 22
             elif i == len(wpCords) - 1:
                 cmd = 21
-            else:
-                cmd = 16
+
             f.write("{}\t{}\t{}\t{}\t0.00000000\t0.00000000\t0.00000000\t0.00000000\t{}\t{}\t{}\t1\n".format(i, int(i == 0), 0 if i == 0 else 3, cmd, cord[0], cord[1], cord[2]))
 
 
