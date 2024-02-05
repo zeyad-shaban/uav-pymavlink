@@ -13,233 +13,222 @@
     https://ardupilot.org/copter/docs/parameters.html#fence-total-fence-polygon-point-total
 """
 
-import time
-import pymavlink.mavutil as utility
 import pymavlink.dialects.v20.all as dialect
-import modules.utils as utils
+from modules.utils import readlatlongFile
 
 # introduce FENCE_TOTAL and FENCE_ACTION as byte array and do not use parameter index
 FENCE_TOTAL = "FENCE_TOTAL".encode(encoding="utf-8")
 FENCE_ACTION = "FENCE_ACTION".encode(encoding="utf8")
 PARAM_INDEX = -1
 
-# create fence item list
-fence_list = utils.readlatlongFile("Geofence.csv")
-# connect to vehicle
+def uploadFence(master, fencePath):
+    fence_list = readlatlongFile(fencePath)
 
-vehicle = utility.mavlink_connection(device="udpin:127.0.0.1:14551")
+    # create PARAM_REQUEST_READ message
+    message = dialect.MAVLink_param_request_read_message(target_system=master.target_system,
+                                                        target_component=master.target_component,
+                                                        param_id=FENCE_ACTION,
+                                                        param_index=PARAM_INDEX)
 
-# wait for a heartbeat
-vehicle.wait_heartbeat()
+    # send PARAM_REQUEST_READ message to the vehicle
+    master.mav.send(message)
 
-# inform user
-print("Connected to system:", vehicle.target_system, ", component:", vehicle.target_component)
+    # wait until get FENCE_ACTION
+    while True:
 
-# create PARAM_REQUEST_READ message
-message = dialect.MAVLink_param_request_read_message(target_system=vehicle.target_system,
-                                                     target_component=vehicle.target_component,
-                                                     param_id=FENCE_ACTION,
-                                                     param_index=PARAM_INDEX)
+        # wait for PARAM_VALUE message
+        message = master.recv_match(type=dialect.MAVLink_param_value_message.msgname,
+                                    blocking=True)
 
-# send PARAM_REQUEST_READ message to the vehicle
-vehicle.mav.send(message)
+        # convert the message to dictionary
+        message = message.to_dict()
 
-# wait until get FENCE_ACTION
-while True:
-
-    # wait for PARAM_VALUE message
-    message = vehicle.recv_match(type=dialect.MAVLink_param_value_message.msgname,
-                                 blocking=True)
-
-    # convert the message to dictionary
-    message = message.to_dict()
-
-    # make sure this parameter value message is for FENCE_ACTION
-    if message["param_id"] == "FENCE_ACTION":
-        # get the original fence action parameter from vehicle
-        fence_action_original = int(message["param_value"])
-
-        # break the loop
-        break
-
-# debug parameter value
-print("FENCE_ACTION parameter original:", fence_action_original)
-
-# run until parameter set successfully
-while True:
-
-    # create parameter set message
-    message = dialect.MAVLink_param_set_message(target_system=vehicle.target_system,
-                                                target_component=vehicle.target_component,
-                                                param_id=FENCE_ACTION,
-                                                param_value=dialect.FENCE_ACTION_NONE,
-                                                param_type=dialect.MAV_PARAM_TYPE_REAL32)
-
-    # send parameter set message to the vehicle
-    vehicle.mav.send(message)
-
-    # wait for PARAM_VALUE message
-    message = vehicle.recv_match(type=dialect.MAVLink_param_value_message.msgname,
-                                 blocking=True)
-
-    # convert the message to dictionary
-    message = message.to_dict()
-
-    # make sure this parameter value message is for FENCE_ACTION
-    if message["param_id"] == "FENCE_ACTION":
-
-        # make sure that parameter value reset successfully
-        if int(message["param_value"]) == dialect.FENCE_ACTION_NONE:
-            print("FENCE_ACTION reset to 0 successfully")
+        # make sure this parameter value message is for FENCE_ACTION
+        if message["param_id"] == "FENCE_ACTION":
+            # get the original fence action parameter from vehicle
+            fence_action_original = int(message["param_value"])
 
             # break the loop
             break
 
-        # should send param set message again
-        else:
-            print("Failed to reset FENCE_ACTION to 0, trying again")
+    # debug parameter value
+    print("FENCE_ACTION parameter original:", fence_action_original)
 
-# run until parameter reset successfully
-while True:
+    # run until parameter set successfully
+    while True:
 
-    # create parameter reset message
-    message = dialect.MAVLink_param_set_message(target_system=vehicle.target_system,
-                                                target_component=vehicle.target_component,
-                                                param_id=FENCE_TOTAL,
-                                                param_value=0,
-                                                param_type=dialect.MAV_PARAM_TYPE_REAL32)
+        # create parameter set message
+        message = dialect.MAVLink_param_set_message(target_system=master.target_system,
+                                                    target_component=master.target_component,
+                                                    param_id=FENCE_ACTION,
+                                                    param_value=dialect.FENCE_ACTION_NONE,
+                                                    param_type=dialect.MAV_PARAM_TYPE_REAL32)
 
-    # send parameter reset message to the vehicle
-    vehicle.mav.send(message)
+        # send parameter set message to the vehicle
+        master.mav.send(message)
 
-    # wait for PARAM_VALUE message
-    message = vehicle.recv_match(type=dialect.MAVLink_param_value_message.msgname,
-                                 blocking=True)
+        # wait for PARAM_VALUE message
+        message = master.recv_match(type=dialect.MAVLink_param_value_message.msgname,
+                                    blocking=True)
 
-    # convert the message to dictionary
-    message = message.to_dict()
+        # convert the message to dictionary
+        message = message.to_dict()
 
-    # make sure this parameter value message is for FENCE_TOTAL
-    if message["param_id"] == "FENCE_TOTAL":
+        # make sure this parameter value message is for FENCE_ACTION
+        if message["param_id"] == "FENCE_ACTION":
 
-        # make sure that parameter value set successfully
-        if int(message["param_value"]) == 0:
-            print("FENCE_TOTAL reset to 0 successfully")
+            # make sure that parameter value reset successfully
+            if int(message["param_value"]) == dialect.FENCE_ACTION_NONE:
+                print("FENCE_ACTION reset to 0 successfully")
 
-            # break the loop
-            break
+                # break the loop
+                break
 
-        # should send param reset message again
-        else:
-            print("Failed to reset FENCE_TOTAL to 0")
+            # should send param set message again
+            else:
+                print("Failed to reset FENCE_ACTION to 0, trying again")
 
-# run until parameter set successfully
-while True:
+    # run until parameter reset successfully
+    while True:
 
-    # create parameter set message
-    message = dialect.MAVLink_param_set_message(target_system=vehicle.target_system,
-                                                target_component=vehicle.target_component,
-                                                param_id=FENCE_TOTAL,
-                                                param_value=len(fence_list),
-                                                param_type=dialect.MAV_PARAM_TYPE_REAL32)
+        # create parameter reset message
+        message = dialect.MAVLink_param_set_message(target_system=master.target_system,
+                                                    target_component=master.target_component,
+                                                    param_id=FENCE_TOTAL,
+                                                    param_value=0,
+                                                    param_type=dialect.MAV_PARAM_TYPE_REAL32)
 
-    # send parameter set message to the vehicle
-    vehicle.mav.send(message)
+        # send parameter reset message to the vehicle
+        master.mav.send(message)
 
-    # wait for PARAM_VALUE message
-    message = vehicle.recv_match(type=dialect.MAVLink_param_value_message.msgname,
-                                 blocking=True)
+        # wait for PARAM_VALUE message
+        message = master.recv_match(type=dialect.MAVLink_param_value_message.msgname,
+                                    blocking=True)
 
-    # convert the message to dictionary
-    message = message.to_dict()
+        # convert the message to dictionary
+        message = message.to_dict()
 
-    # make sure this parameter value message is for FENCE_TOTAL
-    if message["param_id"] == "FENCE_TOTAL":
+        # make sure this parameter value message is for FENCE_TOTAL
+        if message["param_id"] == "FENCE_TOTAL":
 
-        # make sure that parameter value set successfully
-        if int(message["param_value"]) == len(fence_list):
-            print("FENCE_TOTAL set to {0} successfully".format(len(fence_list)))
+            # make sure that parameter value set successfully
+            if int(message["param_value"]) == 0:
+                print("FENCE_TOTAL reset to 0 successfully")
 
-            # break the loop
-            break
+                # break the loop
+                break
 
-        # should send param set message again
-        else:
-            print("Failed to set FENCE_TOTAL to {0}".format(len(fence_list)))
+            # should send param reset message again
+            else:
+                print("Failed to reset FENCE_TOTAL to 0")
 
-# initialize fence item index counter
-idx = 0
+    # run until parameter set successfully
+    while True:
 
-# run until all the fence items uploaded successfully
-while idx < len(fence_list):
+        # create parameter set message
+        message = dialect.MAVLink_param_set_message(target_system=master.target_system,
+                                                    target_component=master.target_component,
+                                                    param_id=FENCE_TOTAL,
+                                                    param_value=len(fence_list),
+                                                    param_type=dialect.MAV_PARAM_TYPE_REAL32)
 
-    # create FENCE_POINT message
-    message = dialect.MAVLink_fence_point_message(target_system=vehicle.target_system,
-                                                  target_component=vehicle.target_component,
-                                                  idx=idx,
-                                                  count=len(fence_list),
-                                                  lat=fence_list[idx][0],
-                                                  lng=fence_list[idx][1])
+        # send parameter set message to the vehicle
+        master.mav.send(message)
 
-    # send this message to vehicle
-    vehicle.mav.send(message)
+        # wait for PARAM_VALUE message
+        message = master.recv_match(type=dialect.MAVLink_param_value_message.msgname,
+                                    blocking=True)
 
-    # create FENCE_FETCH_POINT message
-    message = dialect.MAVLink_fence_fetch_point_message(target_system=vehicle.target_system,
-                                                        target_component=vehicle.target_component,
-                                                        idx=idx)
+        # convert the message to dictionary
+        message = message.to_dict()
 
-    # send this message to vehicle
-    vehicle.mav.send(message)
+        # make sure this parameter value message is for FENCE_TOTAL
+        if message["param_id"] == "FENCE_TOTAL":
 
-    # wait until receive FENCE_POINT message
-    message = vehicle.recv_match(type=dialect.MAVLink_fence_point_message.msgname,
-                                 blocking=True)
+            # make sure that parameter value set successfully
+            if int(message["param_value"]) == len(fence_list):
+                print("FENCE_TOTAL set to {0} successfully".format(len(fence_list)))
 
-    # convert the message to dictionary
-    message = message.to_dict()
+                # break the loop
+                break
 
-    # get the latitude and longitude from the fence item
-    latitude = message["lat"]
-    longitude = message["lng"]
+            # should send param set message again
+            else:
+                print("Failed to set FENCE_TOTAL to {0}".format(len(fence_list)))
 
-    # check the fence point is uploaded successfully
-    if latitude != 0.0 and longitude != 0:
-        # increase the index of the fence item
-        idx += 1
+    # initialize fence item index counter
+    idx = 0
 
-print("All the fence items uploaded successfully")
+    # run until all the fence items uploaded successfully
+    while idx < len(fence_list):
 
-# run until parameter set successfully
-while True:
+        # create FENCE_POINT message
+        message = dialect.MAVLink_fence_point_message(target_system=master.target_system,
+                                                    target_component=master.target_component,
+                                                    idx=idx,
+                                                    count=len(fence_list),
+                                                    lat=fence_list[idx][0],
+                                                    lng=fence_list[idx][1])
 
-    # create parameter set message
-    message = dialect.MAVLink_param_set_message(target_system=vehicle.target_system,
-                                                target_component=vehicle.target_component,
-                                                param_id=FENCE_ACTION,
-                                                param_value=fence_action_original,
-                                                param_type=dialect.MAV_PARAM_TYPE_REAL32)
+        # send this message to vehicle
+        master.mav.send(message)
 
-    # send parameter set message to the vehicle
-    vehicle.mav.send(message)
+        # create FENCE_FETCH_POINT message
+        message = dialect.MAVLink_fence_fetch_point_message(target_system=master.target_system,
+                                                            target_component=master.target_component,
+                                                            idx=idx)
 
-    # wait for PARAM_VALUE message
-    message = vehicle.recv_match(type=dialect.MAVLink_param_value_message.msgname,
-                                 blocking=True)
+        # send this message to vehicle
+        master.mav.send(message)
 
-    # convert the message to dictionary
-    message = message.to_dict()
+        # wait until receive FENCE_POINT message
+        message = master.recv_match(type=dialect.MAVLink_fence_point_message.msgname,
+                                    blocking=True)
 
-    # make sure this parameter value message is for FENCE_ACTION
-    if message["param_id"] == "FENCE_ACTION":
+        # convert the message to dictionary
+        message = message.to_dict()
 
-        # make sure that parameter value set successfully
-        if int(message["param_value"]) == fence_action_original:
-            print("FENCE_ACTION set to original value {0} successfully".format(fence_action_original))
+        # get the latitude and longitude from the fence item
+        latitude = message["lat"]
+        longitude = message["lng"]
 
-            # break the loop
-            break
+        # check the fence point is uploaded successfully
+        if latitude != 0.0 and longitude != 0:
+            # increase the index of the fence item
+            idx += 1
 
-        # should send param set message again
-        else:
-            print("Failed to set FENCE_ACTION to original value {0} ".format(fence_action_original))
+    print("All the fence items uploaded successfully")
+
+    # run until parameter set successfully
+    while True:
+
+        # create parameter set message
+        message = dialect.MAVLink_param_set_message(target_system=master.target_system,
+                                                    target_component=master.target_component,
+                                                    param_id=FENCE_ACTION,
+                                                    param_value=fence_action_original,
+                                                    param_type=dialect.MAV_PARAM_TYPE_REAL32)
+
+        # send parameter set message to the vehicle
+        master.mav.send(message)
+
+        # wait for PARAM_VALUE message
+        message = master.recv_match(type=dialect.MAVLink_param_value_message.msgname,
+                                    blocking=True)
+
+        # convert the message to dictionary
+        message = message.to_dict()
+
+        # make sure this parameter value message is for FENCE_ACTION
+        if message["param_id"] == "FENCE_ACTION":
+
+            # make sure that parameter value set successfully
+            if int(message["param_value"]) == fence_action_original:
+                print("FENCE_ACTION set to original value {0} successfully".format(fence_action_original))
+
+                # break the loop
+                break
+
+            # should send param set message again
+            else:
+                print("Failed to set FENCE_ACTION to original value {0} ".format(fence_action_original))

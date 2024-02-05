@@ -31,7 +31,20 @@ def readlatlongaltFile(path):
         return cords
 
 
-def new_waypoint(lat1, long1, d, brng):  # Calculate new waypoint using waypoint, distance and bearing
+def writeMissionPlannerFile(wpCords, path):
+    with open(path, 'w') as f:
+        f.write("QGC WPL 110\n")
+        for i, cord in enumerate(wpCords):
+            if i == 1:
+                cmd = 22
+            elif i == len(wpCords) - 1:
+                cmd = 21
+            else:
+                cmd = 16
+            f.write("{}\t{}\t{}\t{}\t0.00000000\t0.00000000\t0.00000000\t0.00000000\t{}\t{}\t{}\t1\n".format(i, int(i == 0), 0 if i == 0 else 3, cmd, cord[0], cord[1], cord[2]))
+
+
+def new_waypoint(lat1, long1, d, brng):
     brng = brng * (math.pi/180)
     lat1_r, long1_r = math.radians(lat1), math.radians(long1)
     lat2_r = math.asin(math.sin(lat1_r) * math.cos(d / R) + math.cos(lat1_r) * math.sin(d / R) * math.cos(brng))
@@ -109,12 +122,13 @@ def payload_drop_eq(H1, Vpa, Vag, angle):
 
 def getDistance2Points(lat1, lon1, lat2, lon2):
     lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
-    dlon = lon2 - lon1 
-    dlat = lat2 - lat1 
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
     a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-    c = 2 * math.asin(math.sqrt(a)) 
-    km = 6371* c
+    c = 2 * math.asin(math.sqrt(a))
+    km = 6371 * c
     return km * 1000
+
 
 def getBearing2Points(lat1, long1, lat2, long2):
     lat1_r, long1_r = math.radians(lat1), math.radians(long1)

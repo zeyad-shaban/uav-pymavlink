@@ -1,26 +1,17 @@
 # TODO TEST
-from pymavlink import mavutil, mavwp
-from modules.utils import readlatlongaltFile, getDistance2Points, getBearing2Points, new_waypoint
+from modules.utils import readlatlongaltFile, getDistance2Points, getBearing2Points, new_waypoint, writeMissionPlannerFile
 import math
-
-from modules.UAV import UAV
-myUav = UAV('./wdronekit/Data.json')
 
 safetyMargin = 0
 pointsAroundObs = 1
 
-master = mavutil.mavlink_connection("udpin:172.26.240.1:14550")
-master.wait_heartbeat()
-wpLoader = mavwp.MAVWPLoader()
-
-
-def ObstacleAvoid(wpPath, obsPath):
+def ObstacleAvoid(uav, wpPath, obsPath):
     wpCords = readlatlongaltFile(wpPath)
     obsCords = readlatlongaltFile(obsPath)
     newWaypoints = []
 
     def add_avoid_waypoint(latA, longA, altA, latB, longB, altB, obsLat, obsLong, obsRad, obsBearing, execludeObsI):
-        dObs = obsRad * myUav.safe_dist
+        dObs = obsRad * uav.safe_dist
 
         latNew, longNew = new_waypoint(obsLat, obsLong, dObs, obsBearing)
         check_obstacles(latA, longA, altA, latNew, longNew, altA, execludeObsI)
@@ -46,7 +37,7 @@ def ObstacleAvoid(wpPath, obsPath):
 
             L = distance_a_obs * math.sin(brng*(math.pi/180))
 
-            if not ((brng <= 270 and brng >= 90) or (L >= (myUav.safe_dist * ObsRad)) or (distance_a_obs > distance_a_b)):
+            if not ((brng <= 270 and brng >= 90) or (L >= (uav.safe_dist * ObsRad)) or (distance_a_obs > distance_a_b)):
                 add_avoid_waypoint(latA, longA, altA, latB, longB, altB, ObsLat, ObsLong, ObsRad, bearingObs, i)
 
     if len(obsCords) == 0:
@@ -80,11 +71,6 @@ def ObstacleAvoid(wpPath, obsPath):
 
             newWaypoints.append([latB, longB, altB])
 
-    master.waypoint_clear_all_send()
-    master.waypoint_count_send(wpLoader.count())
-
-    for i in range(wpLoader.count()):
-        msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
-        master.mav.send(wpLoader.wp(msg.seq))
-
+    writeMissionPlannerFile(newWaypoints, './data/AVOIDED_WP.txt')
+    
     return newWaypoints
