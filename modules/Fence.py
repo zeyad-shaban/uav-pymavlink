@@ -16,7 +16,7 @@
 import time
 import pymavlink.mavutil as utility
 import pymavlink.dialects.v20.all as dialect
-import utils
+import modules.utils as utils
 
 # introduce FENCE_TOTAL and FENCE_ACTION as byte array and do not use parameter index
 FENCE_TOTAL = "FENCE_TOTAL".encode(encoding="utf-8")

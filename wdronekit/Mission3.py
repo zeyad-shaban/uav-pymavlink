@@ -8,7 +8,7 @@ import json
 import csv
 import Obs_Avoid_Module
 import Fence_Module
-import utils
+import modules.utils as utils
 
 class automission(object):
     # docstring for automission

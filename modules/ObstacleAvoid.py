@@ -1,9 +1,9 @@
 # TODO TEST
 from pymavlink import mavutil, mavwp
-from utils import readlatlongaltFile, getDistance2Points, getBearing2Points, new_waypoint
+from modules.utils import readlatlongaltFile, getDistance2Points, getBearing2Points, new_waypoint
 import math
 
-from UAV import UAV
+from modules.UAV import UAV
 myUav = UAV('./wdronekit/Data.json')
 
 safetyMargin = 0
@@ -64,7 +64,7 @@ def ObstacleAvoid(wpPath, obsPath):
             if abs(distance) <= 30:
                 ObsLat_new, ObsLong_new = new_waypoint(obs[0], obs[1], distance / 2, bearing)
                 # ! TEST THE NEW RADIUS IMPLEMENTATION INSTEAD OF JUST ADDING
-                obsRadius = math.sqrt(obs[2]**2 + nextObs[2]**2)  # obs[2] + nextObs[2]
+                obsRadius = obs[2] + nextObs[2] # math.sqrt(obs[2]**2 + nextObs[2]**2)
                 obsCords[i] = [ObsLat_new, ObsLong_new, obsRadius]
                 del obsCords[i+1]
             else:

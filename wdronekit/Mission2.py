@@ -8,93 +8,10 @@ import json
 import csv
 import Obs_Avoid_Module
 import Fence_Module
-import utils
+import modules.utils as utils
 
 class automission(object):
     pass
-    # docstring for automission
-# def readmission(aFileName): #Load a mission from a file into a list
-#     print("\nReading mission from file: %s" % aFileName)
-#     cmds = vehicle.commands
-#     missionlist = []
-#     with open(aFileName) as f:
-#         for i, line in enumerate(f):
-#             linearray = line.split('\t')
-#             ln_index = int(linearray[0])
-#             ln_currentwp = int(linearray[1])
-#             ln_frame = int(linearray[2])
-#             ln_command = int(linearray[3])
-#             ln_param1 = float(linearray[4])
-#             ln_param2 = float(linearray[5])
-#             ln_param3 = float(linearray[6])
-#             ln_param4 = float(linearray[7])
-#             ln_param5 = float(linearray[8])
-#             ln_param6 = float(linearray[9])
-#             ln_param7 = float(linearray[10])
-#             ln_autocontinue = int(linearray[11].strip())
-#             cmd = Command(0, 0, 0, ln_frame, ln_command, ln_currentwp, ln_autocontinue, ln_param1, ln_param2,
-#                           ln_param3, ln_param4, ln_param5, ln_param6, ln_param7)
-#             missionlist.append(cmd)
-#     return missionlist
-
-# def upload_mission(aFileName): #Upload a mission from a file
-#     missionlist = readmission(aFileName) # Read mission from file
-#     print("\nUpload mission from a file: %s" % aFileName)
-#     print(' Clear mission')
-#     cmds = vehicle.commands
-#     #cmds.clear() # Clear existing mission from vehicle
-#     # Add new mission to vehicle
-#     for command in missionlist:
-#         cmds.add(command)
-#     print(' Upload mission')
-#     vehicle.commands.upload()
-
-# def download_mission(): #Downloads the current mission and returns it in a list
-#     #It is used in save_mission() to get the file information to save
-#     print(" Download mission from vehicle")
-#     missionlist = []
-#     cmds = vehicle.commands
-#     cmds.download()
-#     cmds.wait_ready()
-#     for cmd in cmds:
-#         missionlist.append(cmd)
-#     return missionlist
-
-# def save_mission(aFileName): #Save a mission in the Waypoint file format
-#     print("\nSave mission from Vehicle to file: %s" % aFileName)
-#     missionlist = download_mission() #Download mission from vehicle
-#     # Add file-format information
-#     output = 'QGC WPL 110\n'
-#     home = vehicle.home_location #Add home location as 0th waypoint
-#     output += "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (0, 1, 0, 16, 0, 0, 0, 0, home.lat, home.lon, home.alt, 1)
-#     # Add commands
-#     for cmd in missionlist:
-#         commandline = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (
-#         cmd.seq, cmd.current, cmd.frame, cmd.command, cmd.param1, cmd.param2, cmd.param3, cmd.param4, cmd.x, cmd.y,
-#         cmd.z, cmd.autocontinue)
-#         output += commandline
-#     with open(aFileName, 'w') as file_:
-#         print(" Writing mission to file")
-#         file_.write(output)
-
-def take_off_sequence():
-    brng = utils.myUav.main_bearing
-    take_off_lat, take_off_long = utils.new_waypoint(home_lat, home_long, 1, brng)
-    cmd_takeoff = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, utils.myUav.takeoff_angle, 0, 0, 0, take_off_lat, take_off_long, utils.myUav.takeoff_alt)
-    cmds.add(cmd_takeoff)
-
-
-def landing_sequence(): #Create Landing Sequence
-    brng = utils.myUav.main_bearing  # Bearing Angle in degrees
-    start_land_dist = 100
-    loiter_alt = 20
-    loiter_rad = 50
-    loiter_lat,loiter_long = utils.new_waypoint(home_lat,home_long,start_land_dist,brng-180)
-    cmd_loiter = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LOITER_TO_ALT, 0, 0, 0, loiter_rad, 0, 0, loiter_lat, loiter_long, loiter_alt)
-    cmd_land = Command(0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 0, 0, 0, 0, 0, home_lat, home_long, 0)
-    cmds.add(cmd_loiter)
-    cmds.add(cmd_land)
-
 def add_survey(waypoints_filename,grid_filename):
     # Determine the last line number in the output file
     with open(waypoints_filename + "2.txt", "a+") as wp_grid_file:
