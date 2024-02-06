@@ -19,6 +19,7 @@ def startMission(uav, connectionString):
 
         drop_x, drop_y = payload_drop_eq(uav.H1, uav.Vpa, uav.Vag, uav.angle)
         drop_x = 0
+        acceptanceRadius = 10
 
         for payloadCord in payloadCords:
             wpBefore1_lat, wpBefore1_long = new_waypoint(payloadCord[0], payloadCord[1], d_wp*2, brng)
@@ -29,7 +30,7 @@ def startMission(uav, connectionString):
 
             wpBefore2_lat, wpBefore2_long = new_waypoint(payloadCord[0], payloadCord[1], d_wp, brng)
             wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-                master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+                master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, acceptanceRadius, 0, 0,
                 wpBefore2_lat, wpBefore2_long, altwp
             ))
 
