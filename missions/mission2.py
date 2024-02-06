@@ -1,8 +1,8 @@
 # MISSION PLANNER SOURCE CODE HOLLY HECK: https://github.com/ArduPilot/MissionPlanner/tree/c19b4fae19e41f5da5dba91d1b5ab1ed0efe9dbd/ExtLibs/SimpleGrid
 from pymavlink import mavutil, mavwp
-from modules.utils import addHome, takeoffSequence, landingSequence, readMissionPlannerFile
-from modules.ObstacleAvoid import ObstacleAvoid
+from modules.utils import addHome, takeoffSequence, landingSequence, createSquareFromMidpoint, generateSurveyFromRect
 from modules.Fence import uploadFence
+from modules.RectPoints import RectPoints
 
 
 def startMission(uav, connectionString):
@@ -10,16 +10,26 @@ def startMission(uav, connectionString):
     master.wait_heartbeat()
     wpLoader = mavwp.MAVWPLoader()
 
+    surveyAlt = 80
+
     uploadFence(master, './data/Geofence.csv')
 
     home = addHome(master, wpLoader)
     takeoffSequence(master, wpLoader, home, uav)
 
-    cords = readMissionPlannerFile('./data/SearchGrid.txt')
+    squarePoints: RectPoints = createSquareFromMidpoint([29.8145362, 30.8257806], 200)
+    # cords = [
+    #     [squarePoints.topLeft[0], squarePoints.topLeft[1]],
+    #     [squarePoints.topRight[0], squarePoints.topRight[1]],
+    #     [squarePoints.bottomRight[0], squarePoints.bottomRight[1]],
+    #     [squarePoints.bottomLeft[0], squarePoints.bottomLeft[1]],
+    # ]
+    cords = generateSurveyFromRect(squarePoints)
     for i, cord in enumerate(cords):
+        print(cord)
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i+2, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            float(cord[0]), float(cord[1]), float(cord[2])))
+            float(cord[0]), float(cord[1]), 100))
 
     landingSequence(master, wpLoader, home, uav)
 
