@@ -7,7 +7,7 @@ pointsAroundObs = 1
 
 def ObstacleAvoid(uav, wpPath, obsPath):
     wpCords = readlatlongaltFile(wpPath)
-    obsCords = readlatlongaltFile(obsPath)
+    obsCords = [] if obsPath is None else readlatlongaltFile(obsPath)
     newWaypoints = []
 
     def add_avoid_waypoint(latA, longA, altA, latB, longB, altB, obsLat, obsLong, obsRad, obsBearing, execludeObsI):
