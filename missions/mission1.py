@@ -1,6 +1,7 @@
 from pymavlink import mavutil, mavwp
 from modules.utils import new_waypoint, readlatlongFile, payload_drop_eq, addHome, takeoffSequence, landingSequence
 from modules.ObstacleAvoid import ObstacleAvoid
+from modules.Waypoint import Waypoint
 # from modules.Fence import uploadFence
 
 
@@ -32,7 +33,6 @@ def startMission(uav, connectionString):
                 wpBefore2_lat, wpBefore2_long, altwp
             ))
 
-            # ! THIS DIDN'T WORK IN THE GRAPH SIMULATOR, at least in servoTest.py
             latDrop, longDrop = new_waypoint(payloadCord[0], payloadCord[1], drop_x, brng)
             wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
                 master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, 8, 1500, 0, 0,

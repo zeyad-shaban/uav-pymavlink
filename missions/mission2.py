@@ -1,6 +1,6 @@
 # MISSION PLANNER SOURCE CODE HOLLY HECK: https://github.com/ArduPilot/MissionPlanner/tree/c19b4fae19e41f5da5dba91d1b5ab1ed0efe9dbd/ExtLibs/SimpleGrid
 from pymavlink import mavutil, mavwp
-from modules.utils import new_waypoint, addHome, takeoffSequence, landingSequence, readlatlongFile
+from modules.utils import addHome, takeoffSequence, landingSequence, readMissionPlannerFile
 from modules.ObstacleAvoid import ObstacleAvoid
 from modules.Fence import uploadFence
 
@@ -15,8 +15,11 @@ def startMission(uav, connectionString):
     home = addHome(master, wpLoader)
     takeoffSequence(master, wpLoader, home, uav)
 
-    squareCords = readlatlongFile('./data/Square.csv')
-    print(squareCords)
+    cords = readMissionPlannerFile('./data/SearchGrid.txt')
+    for i, cord in enumerate(cords):
+        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+            master.target_system, master.target_component, i+2, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+            float(cord[0]), float(cord[1]), float(cord[2])))
 
     landingSequence(master, wpLoader, home, uav)
 

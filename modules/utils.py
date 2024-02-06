@@ -32,6 +32,18 @@ def readlatlongaltFile(path):
         return cords
 
 
+def readMissionPlannerFile(path):
+    with open(path, 'r') as f:
+        if not next(f).startswith("QGC WPL 110"):
+            return print("File not supported (must start with QGC WPL 110)")
+
+        cords = []
+        for line in f:
+            line = line.split("\t")
+            cords.append([line[8], line[9], line[10]])
+    
+    return cords
+
 def writeMissionPlannerFile(wpCords, path):
     with open(path, 'w') as f:
         f.write("QGC WPL 110\n")
