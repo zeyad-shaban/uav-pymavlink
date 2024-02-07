@@ -12,7 +12,7 @@ def startMission(uav, connectionString):
 
     surveyAlt = 80
     midpointCords = [29.8145362, 30.8257806]
-    surveyDistance = 1000 # in meters
+    surveyDistance = 200 # in meters
     surveySpacing = 10 # in meters
 
     uploadFence(master, './data/Geofence.csv')
