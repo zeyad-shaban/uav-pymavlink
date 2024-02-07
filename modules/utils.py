@@ -196,15 +196,17 @@ def createSquareFromMidpoint(midpoint: List[float], length: float) -> RectPoints
     return RectPoints(topLeft, topRight, bottomRight, bottomLeft)
 
 
+# hard
+# ! TODO get closest corner to current position to be the start position
+# TODO get bearing of the largest line to make the plane go at it (instead of 180)
+
+# ez
+# TODO get spacing distance and other params of GoPro Hero 4 Black Wide, sony a6000
+# TODO change plane speed
+# TODO GENERATE RECTANGLE FROM FILE INSTEAD
 def generateSurveyFromRect(rect: RectPoints, spacing) -> List[List[float]]:
     points = []
     lenUncovered = rect.width
-    # TODO GENERATE RECTANGLE FROM FILE
-    # TODO change plane speed
-    # ! TODO get closest corner to current position
-    # TODO get spacing distance and other params of GoPro Hero 4 Black Wide, sony a700
-    # TODO get bearing of the largest line to make the plane go at it (instead of 180)
-
     lastPoint = [rect.topLeft[0], rect.topLeft[1]]
     spacingToggle = False
     latDirection = -1
