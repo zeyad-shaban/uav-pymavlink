@@ -11,25 +11,28 @@ def startMission(uav, connectionString):
     wpLoader = mavwp.MAVWPLoader()
 
     surveyAlt = 80
+    midpointCords = [29.8145362, 30.8257806]
+    surveyDistance = 1000 # in meters
+    surveySpacing = 10 # in meters
 
     uploadFence(master, './data/Geofence.csv')
 
     home = addHome(master, wpLoader)
     takeoffSequence(master, wpLoader, home, uav)
 
-    squarePoints: RectPoints = createSquareFromMidpoint([29.8145362, 30.8257806], 200)
+    squarePoints: RectPoints = createSquareFromMidpoint(midpointCords, surveyDistance)
+    # uncomment below to visualize the square
     # cords = [
     #     [squarePoints.topLeft[0], squarePoints.topLeft[1]],
     #     [squarePoints.topRight[0], squarePoints.topRight[1]],
     #     [squarePoints.bottomRight[0], squarePoints.bottomRight[1]],
     #     [squarePoints.bottomLeft[0], squarePoints.bottomLeft[1]],
     # ]
-    cords = generateSurveyFromRect(squarePoints)
+    cords = generateSurveyFromRect(squarePoints, surveySpacing)
     for i, cord in enumerate(cords):
-        print(cord)
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i+2, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            float(cord[0]), float(cord[1]), 100))
+            float(cord[0]), float(cord[1]), surveyAlt))
 
     landingSequence(master, wpLoader, home, uav)
 

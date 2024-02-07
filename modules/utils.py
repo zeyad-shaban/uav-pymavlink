@@ -192,12 +192,13 @@ def createSquareFromMidpoint(midpoint: List[float], length: float) -> RectPoints
     topRight = new_waypoint(midpoint[0], midpoint[1], half_length, 45)
     bottomRight = new_waypoint(midpoint[0], midpoint[1], half_length, 135)
     bottomLeft = new_waypoint(midpoint[0], midpoint[1], half_length, 225)
-    return RectPoints(topLeft, topRight, bottomRight, bottomLeft, length)
+
+    return RectPoints(topLeft, topRight, bottomRight, bottomLeft)
 
 
-def generateSurveyFromRect(rect: RectPoints, spacing=5) -> List[List[float]]:
+def generateSurveyFromRect(rect: RectPoints, spacing) -> List[List[float]]:
     points = []
-    lenUncovered = rect.length
+    lenUncovered = rect.width
 
     lastPoint = [rect.topLeft[0], rect.topLeft[1]]
     spacingToggle = False
