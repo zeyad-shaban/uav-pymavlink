@@ -62,25 +62,8 @@ def startMission(uav: UAV, connectionString: str, camera: Camera) -> None:
 
 def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List[float]]:
     points = []
-    lenUncovered = rec.width
-
-    lastPoint = rec.getClosestPoint(planeLocation)
-    spacingToggle = False
-    latDirection = -1 if lastPoint == rec.topLeft or lastPoint == rec.topRight else 1
-
-    while True:
-        points.append(list(lastPoint))  # Create a new list to avoid mutating the original
-        if spacingToggle:
-            lastPoint[1] += spacing / (1000 * 111)  # Convert from meters to degrees
-            lenUncovered -= spacing
-            spacingToggle = False
-        else:
-            lastPoint[0] += rec.length * latDirection / (1000 * 111)  # Convert from meters to degrees
-            latDirection *= -1
-            spacingToggle = True
-
-        if lastPoint[1] > rec.topRight[1] + spacing / (1000 * 111):
-            break
+    
+    points.append(planeLocation)
 
     return points
 

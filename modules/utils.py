@@ -76,66 +76,6 @@ def printfile(aFileName):  # Print a mission file to demonstrate "round trip"
         for line in f:
             print(' %s' % line.strip())
 
-
-def payload_drop_eq(H1, Vpa, Vag, angle):
-    g = 9.81  # acceleration due to gravity
-    Cd = 0.5  # drag coefficient of payloads
-    rho = 1.225  # density of air
-    A = 0.02  # average cross section of the payload
-    m = 1  # mass of the payload
-    H = [float(H1)]  # height of the plane in meters
-    ty = [0]  # duration of fall
-    Vy = [0]  # velocity in downward direction
-    acc = [9.81]  # acceleration in downward direction
-    Dy = [0]  # upward drag force
-    dy = [0]  # deceleration due to drag force
-    k = 1
-    int = 0.001  # time intervals for calculation in the loops
-
-    while H[k-1] > 0:
-        ty.append(ty[k-1] + int)
-        H.append(H[k-1] - (Vy[k-1] * int + 0.5 * acc[k-1] * int**2))
-        Vy.append(Vy[k-1] + acc[k-1] * int)
-        Dy.append(Cd * rho * (Vy[k-1]**2) * A / 2)
-        dy.append(Dy[k-1] / m)
-        acc.append(g - dy[k])
-        k = k + 1
-
-    print("££££££££££££££££££££££££££££££")
-    print("Duration of free-fall:", ty[k-1], "sec")
-    print("££££££££££££££££££££££££££££££")
-
-    Vpa = float(Vpa)  # cruising velocity in m/s
-    Vag = float(Vag)  # velocity of wind wrt to ground in m/s
-    angle = float(angle)  # angle of Vag in degrees
-
-    Vpg = Vpa - Vag * np.cos(np.deg2rad(angle))  # velocity of plane wrt ground
-    Vx = [Vpg]  # velocity of payload in horizontal direction
-    R = [0]  # distance covered by payload in horizontal direction
-    Dx = [Cd * 1.225 * (Vx[0]**2) * A / 2]  # horizontal drag on the payload
-    dx = [Dx[0] / m]  # horizontal deceleration on the payload
-    k = 1
-
-    Vx = np.append(Vx, np.zeros(len(ty)-1))
-    R = np.append(R, np.zeros(len(ty)-1))
-    Dx = np.append(Dx, np.zeros(len(ty)-1))
-    dx = np.append(dx, np.zeros(len(ty)-1))
-
-    for tx in range(len(ty)-1):
-        R[k] = R[k-1] + (Vx[k-1] * int - 0.5 * dx[k-1] * int**2)
-        Vx[k] = Vx[k-1] - dx[k-1] * int
-        Dx[k] = (Cd*1.225*0.5*A) * (Vx[k] ** 2)
-        dx[k] = Dx[k] / m
-        k = k + 1
-
-    print("££££££££££££££££££££££££££££££")
-    print("Range of payload", (R[k-1]), "meter")
-    print("££££££££££££££££££££££££££££££")
-    x = R[k-1]
-    y = H1
-    return x, y
-
-
 def getDistance2Points(lat1, lon1, lat2, lon2):
     lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
     dlon = lon2 - lon1
