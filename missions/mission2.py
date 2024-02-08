@@ -2,7 +2,7 @@ import os
 import glob
 from typing import List
 from pymavlink import mavutil, mavwp
-from modules.utils import addHome, takeoffSequence, landingSequence, readlatlongFile
+from modules.utils import addHome, takeoffSequence, landingSequence, readlatlongFile, getBearing2Points, new_waypoint, getDistance2Points
 from modules.Fence import uploadFence
 from modules.RectPoints import RectPoints
 from modules.ImageDetector import shouldCapture
@@ -33,13 +33,6 @@ def startMission(uav: UAV, connectionString: str, camera: Camera) -> None:
 
     searchRec = RectPoints(*recCords)
 
-    # uncomment below to visualize the square
-    # cords = [
-    #     [searchRec.topLeft[0], searchRec.topLeft[1]],
-    #     [searchRec.topRight[0], searchRec.topRight[1]],
-    #     [searchRec.bottomRight[0], searchRec.bottomRight[1]],
-    #     [searchRec.bottomLeft[0], searchRec.bottomLeft[1]],
-    # ]
     cords = generateSurveyFromRect(searchRec, camera.spacing, home)
     for i, cord in enumerate(cords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
@@ -55,15 +48,36 @@ def startMission(uav: UAV, connectionString: str, camera: Camera) -> None:
         msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
         master.mav.send(wpLoader.wp(msg.seq))
 
-    # startCam()
+    startCam()
 
-# TODO get bearing of the largest line to make the plane go at it (instead of 180)
 # TODO change plane speed
-
 def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List[float]]:
     points = []
-    
-    points.append(planeLocation)
+    closestPoint = rec.getClosestPoint(planeLocation)
+    furthestConnectedPoint = rec.getFurthestConnectedPoint(closestPoint)
+
+    travelBearing = getBearing2Points(*closestPoint, *furthestConnectedPoint)
+    travelDistance = getDistance2Points(*closestPoint, *furthestConnectedPoint)
+
+    rotatePoint2 = [point for point in rec.getConnectedPoints(furthestConnectedPoint) if point != closestPoint][0]
+    rotateBearing = getBearing2Points(*furthestConnectedPoint, *rotatePoint2)
+    uncoveredDistance = getDistance2Points(*furthestConnectedPoint, *rotatePoint2)
+
+    lastPoint = closestPoint
+    rotateToggle = False
+    direction = 0
+
+    while uncoveredDistance > 0:
+        points.append(lastPoint)
+
+        if rotateToggle:
+            lastPoint = new_waypoint(*lastPoint, spacing, rotateBearing)
+            uncoveredDistance -= spacing
+            direction += 180
+            rotateToggle = False
+        else:
+            lastPoint = new_waypoint(*lastPoint, travelDistance, travelBearing + direction)
+            rotateToggle = True
 
     return points
 
