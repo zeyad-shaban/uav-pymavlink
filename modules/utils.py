@@ -2,12 +2,12 @@ import math
 from typing import List
 import numpy as np
 from pymavlink import mavutil
-from modules.RectPoints import RectPoints
+from typing import List
 
 R = 6371000.0  # Earth radius in meters
 
 
-def readlatlongFile(path):
+def readlatlongFile(path: str) -> List[List[float]]:
     with open(path) as f:
         if not next(f).startswith("n,lat,long"):
             return print("File not supported (must be n,lat,long)")
@@ -184,44 +184,3 @@ def landingSequence(master, wpLoader, home, uav):
         master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, 0,
         loiter_lat, loiter_long, loiter_alt
     ))
-
-
-def createSquareFromMidpoint(midpoint: List[float], length: float) -> RectPoints:
-    half_length = length * math.sqrt(2) / 2
-    topLeft = new_waypoint(midpoint[0], midpoint[1], half_length, 315)
-    topRight = new_waypoint(midpoint[0], midpoint[1], half_length, 45)
-    bottomRight = new_waypoint(midpoint[0], midpoint[1], half_length, 135)
-    bottomLeft = new_waypoint(midpoint[0], midpoint[1], half_length, 225)
-
-    return RectPoints(topLeft, topRight, bottomRight, bottomLeft)
-
-
-# hard
-# ! TODO get closest corner to current position to be the start position
-# TODO get bearing of the largest line to make the plane go at it (instead of 180)
-
-# ez
-# TODO get spacing distance and other params of GoPro Hero 4 Black Wide, sony a6000
-# TODO change plane speed
-# TODO GENERATE RECTANGLE FROM FILE INSTEAD
-def generateSurveyFromRect(rect: RectPoints, spacing) -> List[List[float]]:
-    points = []
-    lenUncovered = rect.width
-    lastPoint = [rect.topLeft[0], rect.topLeft[1]]
-    spacingToggle = False
-    latDirection = -1
-    while True:
-        points.append(list(lastPoint))  # Create a new list to avoid mutating the original
-        if spacingToggle:
-            lastPoint[1] += spacing / (1000 * 111)  # Convert from meters to degrees
-            lenUncovered -= spacing
-            spacingToggle = False
-        else:
-            lastPoint[0] += rect.length * latDirection / (1000 * 111)  # Convert from meters to degrees
-            latDirection *= -1
-            spacingToggle = True
-
-        if lastPoint[1] > rect.topRight[1] + spacing / (1000 * 111):
-            break
-
-    return points
