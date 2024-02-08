@@ -1,11 +1,12 @@
 import os
 import glob
 from typing import List
+import math
 from pymavlink import mavutil, mavwp
 from modules.utils import addHome, takeoffSequence, landingSequence, readlatlongFile, getBearing2Points, new_waypoint, getDistance2Points
 from modules.Fence import uploadFence
 from modules.RectPoints import RectPoints
-from modules.ImageDetector import shouldCapture
+from modules.ImageDetector import capturePixels
 from modules.UAV import UAV
 from modules.Camera import Camera
 
@@ -13,13 +14,11 @@ import cv2
 # import time
 
 
-def startMission(uav: UAV, connectionString: str, camera: Camera) -> None:
+def startMission(uav: UAV, connectionString: str, camera: Camera, surveyAlt: float, surveySpeed: float) -> None:
+    camera.adjutSpacingToAlt(surveyAlt)
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
     wpLoader = mavwp.MAVWPLoader()
-
-    surveyAlt = 80
-    camera.adjutSpacingToAlt(surveyAlt)
 
     uploadFence(master, './data/Geofence.csv')
 
@@ -29,6 +28,7 @@ def startMission(uav: UAV, connectionString: str, camera: Camera) -> None:
     try:
         recCords = readlatlongFile('./data/SearchSquare.csv')
     except FileNotFoundError:
+        print('!!!!USING DEFAULT SEARCH SQUARE!!!!!!!!!')
         recCords = readlatlongFile('./data/defaults/SearchSquare.csv')
 
     searchRec = RectPoints(*recCords)
@@ -38,6 +38,19 @@ def startMission(uav: UAV, connectionString: str, camera: Camera) -> None:
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i+2, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             float(cord[0]), float(cord[1]), surveyAlt))
+        if i == 0:
+            wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+                master.target_system,  # target system
+                mavutil.mavlink.MAV_COMP_ID_SYSTEM_CONTROL,  # target component
+                0,  # sequence number
+                mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,  # frame
+                mavutil.mavlink.MAV_CMD_DO_CHANGE_SPEED,  # command
+                0,  # current
+                1,  # autocontinue
+                0,  # param1 (type of speed: 0=airspeed, 1=ground speed)
+                surveySpeed,  # param2 (target speed, in m/s)
+                0, 0, 0, 0, 0  # param3, param4, param5, param6, param7 (not used)
+            ))
 
     landingSequence(master, wpLoader, home, uav)
 
@@ -48,9 +61,9 @@ def startMission(uav: UAV, connectionString: str, camera: Camera) -> None:
         msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
         master.mav.send(wpLoader.wp(msg.seq))
 
-    startCam()
+    startCam(camera, master)
 
-# TODO change plane speed
+
 def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List[float]]:
     points = []
     closestPoint = rec.getClosestPoint(planeLocation)
@@ -82,10 +95,9 @@ def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List
     return points
 
 
-# ! make sure this will work with pixahawk as the host of the camera, if not need to look at video_start_stream and video_end_stream
-def startCam():
+# ! TODO MUST TEST ON PIXAHAWK
+def startCam(camera: Camera, master):
     imgPath = "./images"
-    cordsPath = "./data/cords.csv"
     camId = 0
 
     os.makedirs(imgPath, exist_ok=True)
@@ -103,77 +115,54 @@ def startCam():
             print("!!!!!FRAME NOT READ CORRECTLY!!!!!")
             break
 
-        if shouldCapture(frame):
+        captured = capturePixels(frame)
+        if captured:
             cv2.imwrite(f'./images/{lastIndex}.png', frame)
             lastIndex += 1
-
-            # time.sleep(0.5) # uncomment only if ai team didn't handle the delay
+            saveGeoCord(camera, master, captured)
+            # time.sleep(0.5)  # uncomment only if ai team didn't handle the delay # ! CAN WE EVEN SLEEP THE PLANE CONNECTION?
 
     cap.release()
 
-# def image_coordinates(uav: UAV, master, camera: Camera):
-#     pixelFile = "Pixels"
-#     p2List, p2No = robenuav.FileList(pixelFile)
-#     with open("Geoloc.txt", 'a') as f:
-#         f.seek(0)
-#         for x in range(p2No+1):
-#             p2 = p2List[x]
-#             p2_width = p2['x']
-#             p2_length = p2['y']
-#             # p2 = [279,272] # random point from AI'S code
+def saveGeoCord(camera: Camera, master, cords: List[float]) -> None:
+    with open("./data/Geoloc.txt", 'a') as f:
+        xCord = cords[0]  # x
+        yCord = cords[1]  # y
 
-#             h_plane = float(vehicle.location.global_frame.alt)  # h_plane=80 #altitude of plane
-#             # h_plane = 80
-#             w_sensor = 6.17  # width sensor
-#             l_sensor = 4.55  # length sensor
-#             fl = 2.92  # focal length
+        msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
 
-#             # Current Locaation
-#             lat1 = float(vehicle.location.global_frame.lat)
-#             long1 = float(vehicle.location.global_frame.lon)
+        centerPixel = [2000, 1500]
 
-#             # lat1 = 29.8259667414763
-#             # long1 = 31.3282012939453
+        pixels_width = abs(float(centerPixel[0]) - float(xCord))
+        pixels_length = abs(float(centerPixel[1]) - float(yCord))
 
-#             # pixels in image
-#             p1 = [2000, 1500]  # center of image
+        gsdw = float(((msg.alt / 1e3) * camera.sensorWidth) / (camera.focalLength*4000))
+        gsdl = float(((msg.alt / 1e3) * camera.sensorHeight) / (camera.focalLength*3000))
+        land_width = gsdw*pixels_width
+        land_length = gsdl*pixels_length
+        distance = math.sqrt(((land_width)**2) + ((land_length)**2))  # distance in meters
 
-#             pixels_width = abs(float(p1[0]) - float(p2_width))
-#             pixels_length = abs(float(p1[1]) - float(p2_length))
+        d1 = centerPixel[0] - int(xCord)
+        d2 = centerPixel[1] - int(yCord)
 
-#             gsdw = float((h_plane*w_sensor) / (fl*4000))
-#             gsdl = float((h_plane*l_sensor) / (fl*3000))
-#             land_width = gsdw*pixels_width
-#             land_length = gsdl*pixels_length
-#             # landwidth = gsdw*1920
-#             # landlength = gsdl*1080
-#             distance = math.sqrt(((land_width)**2) + ((land_length)**2))  # distance in meters
+        if d1 >= 0 and d2 >= 0:  # First quad
+            angle = math.degrees(math.atan(d1/d2))
 
-#             d1 = p1[0] - int(p2_width)
-#             d2 = p1[1] - int(p2_length)
+        elif d1 <= 0 and d2 >= 0:  # second quad
+            d2 = -d2
+            angle = 360 - math.degrees(math.atan(d1/d2))
 
-#             if d1 >= 0 and d2 >= 0:  # First quad
-#                 angle = math.degrees(math.atan(d1/d2))
+        elif d1 <= 0 and d2 <= 0:  # Third quad
+            angle = 270 - math.degrees(math.atan(d2/d1))
 
-#             elif d1 <= 0 and d2 >= 0:  # second quad
-#                 d2 = -d2
-#                 angle = 360 - math.degrees(math.atan(d1/d2))
+        else:
+            d2 = -d2
+            angle = 180 - math.degrees(math.atan(d1/d2))
 
-#             elif d1 <= 0 and d2 <= 0:  # Third quad
-#                 angle = 270 - math.degrees(math.atan(d2/d1))
+        bearing = 0
+        Angle = bearing - angle
 
-#             else:
-#                 d2 = -d2
-#                 angle = 180 - math.degrees(math.atan(d1/d2))
+        image_x2, image_y2 = new_waypoint(msg.lat / 1e7, msg.lon / 1e7, distance, Angle)
 
-#             # bearing = vehicle.heading #Current bearing
-#             bearing = 0
-#             Angle = bearing - angle
-
-#             image_x2, image_y2 = robenuav.new_waypoint(lat1, long1, distance, Angle)
-
-#             f.truncate()
-#             f.write(str(image_x2))
-#             f.write(",")
-#             f.write(str(image_y2))
-#             f.write("\n")
+        f.truncate()
+        f.write(f"{str(image_x2)},{str(image_y2)}\n")
