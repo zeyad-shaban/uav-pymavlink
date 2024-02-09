@@ -120,7 +120,7 @@ def startCam(camera: Camera, master):
             cv2.imwrite(f'./images/{lastIndex}.png', frame)
             lastIndex += 1
             saveGeoCord(camera, master, captured)
-            # time.sleep(0.5)  # uncomment only if ai team didn't handle the delay # ! CAN WE EVEN SLEEP THE PLANE CONNECTION?
+            # time.sleep(0.5)  # uncomment only if ai team didn't handle the delay
 
     cap.release()
 

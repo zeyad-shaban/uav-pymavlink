@@ -61,13 +61,11 @@ def writeMissionPlannerFile(wpCords, path):
 
 
 def new_waypoint(lat1, long1, d, brng):
-    brng = brng * (math.pi/180)
-    lat1_r, long1_r = math.radians(lat1), math.radians(long1)
-    lat2_r = math.asin(math.sin(lat1_r) * math.cos(d / R) + math.cos(lat1_r) * math.sin(d / R) * math.cos(brng))
-    long2_r = long1_r + math.atan2((math.sin(brng) * math.sin(d / R) * math.cos(lat1_r)), (math.cos(d / R) - math.sin(lat1_r) * math.sin(lat2_r)))
-    lat2, long2 = math.degrees(lat2_r), math.degrees(long2_r)
-    brng = brng * (180/math.pi)
-    return lat2, long2
+    brng *= math.pi/180
+    lat1, long1 = math.radians(lat1), math.radians(long1)
+    lat2_r = math.asin(math.sin(lat1) * math.cos(d / R) + math.cos(lat1) * math.sin(d / R) * math.cos(brng))
+    long2_r = long1 + math.atan2((math.sin(brng) * math.sin(d / R) * math.cos(lat1)), (math.cos(d / R) - math.sin(lat1) * math.sin(lat2_r)))
+    return math.degrees(lat2_r), math.degrees(long2_r)
 
 
 def printfile(aFileName):  # Print a mission file to demonstrate "round trip"
@@ -87,13 +85,12 @@ def getDistance2Points(lat1, lon1, lat2, lon2):
 
 
 def getBearing2Points(lat1, long1, lat2, long2):
-    lat1_r, long1_r = math.radians(lat1), math.radians(long1)
-    lat2_r, long2_r = math.radians(lat2), math.radians(long2)
-    y = math.sin(long2_r - long1_r) * math.cos(lat2_r)
-    x = math.cos(lat1_r) * math.sin(lat2_r) - math.sin(lat1_r) * math.cos(lat2_r) * math.cos(long2_r - long1_r)
+    lat1, long1 = math.radians(lat1), math.radians(long1)
+    lat2, long2 = math.radians(lat2), math.radians(long2)
+    y = math.sin(long2 - long1) * math.cos(lat2)
+    x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(long2 - long1)
     i = math.atan2(y, x)
-    bearing = (i * 180 / math.pi + 360) % 360
-    return bearing
+    return (i * 180 / math.pi + 360) % 360
 
 
 def addHome(master, wpLoader):
