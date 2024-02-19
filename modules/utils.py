@@ -1,8 +1,8 @@
 import math
 from typing import List
-import numpy as np
 from pymavlink import mavutil
 from typing import List
+from modules.UAV import UAV
 
 R = 6371000.0  # Earth radius in meters
 
@@ -74,6 +74,7 @@ def printfile(aFileName):  # Print a mission file to demonstrate "round trip"
         for line in f:
             print(' %s' % line.strip())
 
+
 def getDistance2Points(lat1, lon1, lat2, lon2):
     lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
     dlon = lon2 - lon1
@@ -112,12 +113,20 @@ def takeoffSequence(master, wpLoader, home, uav):
     ))
 
 
-def landingSequence(master, wpLoader, home, uav):
+def landingSequence(master, wpLoader, home, uav: UAV):
     start_land_dist = 100
     loiter_alt = 20
+    loiter_rad = 50
     loiter_lat, loiter_long = new_waypoint(home[0], home[1], start_land_dist, uav.main_bearing-180)
 
-    wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, 0,
-        loiter_lat, loiter_long, loiter_alt
-    ))
+    wpLoader.add(
+        mavutil.mavlink.MAVLink_mission_item_message(
+            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LOITER_TO_ALT, 0, 1, 0, loiter_rad, 0, 0,
+            loiter_lat, loiter_long, loiter_alt)
+    )
+
+    wpLoader.add(
+        mavutil.mavlink.MAVLink_mission_item_message(
+            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, 0,
+            home[0], home[1], 0)
+    )
