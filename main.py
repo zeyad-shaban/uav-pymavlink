@@ -10,4 +10,5 @@ if __name__ == "__main__":
     goProHero4Black = Camera(spacingAt100Alt=100.33, focalLength=2.5, imgWidth=40000, imgHeight=3000, sensorWidth=6.17, sensorHeight=4.56) # ! in the code focal length was 2.94, in mission planner it is 2.5
 
     # mission1.startMission(uav, connectionString, payloadRadius=0) # 0 radius means default
+    mission2.startMission(uav, connectionString, sonya6000, 80, 10)
     mission3.startMission(uav, connectionString)
