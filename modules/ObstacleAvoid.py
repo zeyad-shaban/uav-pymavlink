@@ -71,6 +71,6 @@ def ObstacleAvoid(uav, wpPath, obsPath):
 
             newWaypoints.append([latB, longB, altB])
 
-    writeMissionPlannerFile(newWaypoints, './data/AVOIDED_WP.txt')
+    writeMissionPlannerFile(newWaypoints, './data/AVOIDED_WP.waypoints')
     
     return newWaypoints

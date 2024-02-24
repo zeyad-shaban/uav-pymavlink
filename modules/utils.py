@@ -14,7 +14,7 @@ def readWaypoints(path: str) -> List[List[float]]:
             if firstLine.startswith("n,lat,long"):
                 line = line.split(",")
                 cords.append([float(line[0]), float(line[1]), 0])
-            elif firstLine.startswith('n,lat,long,alt'):
+            elif firstLine.startswith('n,lat,long,alt') or firstLine.startswith('n,lat,lon,radius'):
                 line = line.split(",")
                 cords.append([float(line[0]), float(line[1]), float(line[2])])
             elif firstLine.startswith("QGC WPL 110"):
@@ -22,7 +22,8 @@ def readWaypoints(path: str) -> List[List[float]]:
                 cords.append([float(line[8]), float(line[9]), float(line[10])])
 
             else:
-                return "file not supported " + firstLine
+                print(f'!!!!!!"FILE FORMAT NOT SUPPORTED {firstLine}!!!!!!!!!!!')
+                return []
 
         return cords
 
