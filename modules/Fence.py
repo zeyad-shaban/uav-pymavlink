@@ -14,7 +14,7 @@
 """
 
 import pymavlink.dialects.v20.all as dialect
-from modules.utils import readlatlongFile
+from modules.utils import readWaypoints
 
 # introduce FENCE_TOTAL and FENCE_ACTION as byte array and do not use parameter index
 FENCE_TOTAL = "FENCE_TOTAL".encode(encoding="utf-8")
@@ -22,7 +22,7 @@ FENCE_ACTION = "FENCE_ACTION".encode(encoding="utf8")
 PARAM_INDEX = -1
 
 def uploadFence(master, fencePath):
-    fence_list = readlatlongFile(fencePath)
+    fence_list = readWaypoints(fencePath)
 
     # create PARAM_REQUEST_READ message
     message = dialect.MAVLink_param_request_read_message(target_system=master.target_system,

@@ -1,50 +1,30 @@
 import math
 from typing import List
 from pymavlink import mavutil
-from typing import List
 from modules.UAV import UAV
 
 R = 6371000.0  # Earth radius in meters
 
 
-def readlatlongFile(path: str) -> List[List[float]]:
-    with open(path) as f:
-        if not next(f).startswith("n,lat,long"):
-            return print("File not supported (must be n,lat,long)")
-
-        cords = []
-        for line in f:
-            line = line.split(",")
-            cords.append([float(line[0]), float(line[1])])
-
-        return cords
-
-
-def readlatlongaltFile(path):
+def readWaypoints(path: str) -> List[List[float]]:
     with open(path) as f:
         firstLine = next(f)
-        if not firstLine.startswith("n,lat,long,alt") and not firstLine.startswith("n,lat,long,radius"):
-            return print("File not supported (must be n,lat,long, alt)")
-
         cords = []
         for line in f:
-            line = line.split(",")
-            cords.append([float(line[0]), float(line[1]), float(line[2])])
+            if firstLine.startswith("n,lat,long"):
+                line = line.split(",")
+                cords.append([float(line[0]), float(line[1]), 0])
+            elif firstLine.startswith('n,lat,long,alt'):
+                line = line.split(",")
+                cords.append([float(line[0]), float(line[1]), float(line[2])])
+            elif firstLine.startswith("QGC WPL 110"):
+                line = line.split('\t')
+                cords.append([float(line[8]), float(line[9]), float(line[10])])
+
+            else:
+                return "file not supported " + firstLine
 
         return cords
-
-
-def readMissionPlannerFile(path):
-    with open(path, 'r') as f:
-        if not next(f).startswith("QGC WPL 110"):
-            return print("File not supported (must start with QGC WPL 110)")
-
-        cords = []
-        for line in f:
-            line = line.split("\t")
-            cords.append([line[8], line[9], line[10]])
-
-    return cords
 
 
 def writeMissionPlannerFile(wpCords, path):

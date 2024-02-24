@@ -1,13 +1,13 @@
 # TODO TEST
-from modules.utils import readlatlongaltFile, getDistance2Points, getBearing2Points, new_waypoint, writeMissionPlannerFile
+from modules.utils import getDistance2Points, getBearing2Points, new_waypoint, writeMissionPlannerFile, readWaypoints
 import math
 
 safetyMargin = 0
 pointsAroundObs = 1
 
 def ObstacleAvoid(uav, wpPath, obsPath):
-    wpCords = readlatlongaltFile(wpPath)
-    obsCords = [] if obsPath is None else readlatlongaltFile(obsPath)
+    wpCords = readWaypoints(wpPath)
+    obsCords = [] if obsPath is None else readWaypoints(obsPath)
     newWaypoints = []
 
     def add_avoid_waypoint(latA, longA, altA, latB, longB, altB, obsLat, obsLong, obsRad, obsBearing, execludeObsI):

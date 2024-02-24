@@ -8,18 +8,18 @@ class RectPoints:
         sortedByLat = sorted(cords, key=lambda x: x[0])
 
         if sortedByLat[0][1] < sortedByLat[1][1]:
-            self.bottomLeft = sortedByLat[0]
-            self.bottomRight = sortedByLat[1]
+            self.bottomLeft = sortedByLat[0][:2]
+            self.bottomRight = sortedByLat[1][:2]
         else:
-            self.bottomLeft = sortedByLat[1]
-            self.bottomRight = sortedByLat[0]
+            self.bottomLeft = sortedByLat[1][:2]
+            self.bottomRight = sortedByLat[0][:2]
 
         if sortedByLat[2][1] < sortedByLat[3][1]:
-            self.topLeft = sortedByLat[2]
-            self.topRight = sortedByLat[3]
+            self.topLeft = sortedByLat[2][:2]
+            self.topRight = sortedByLat[3][:2]
         else:
-            self.topLeft = sortedByLat[3]
-            self.topRight = sortedByLat[2]
+            self.topLeft = sortedByLat[3][:2]
+            self.topRight = sortedByLat[2][:2]
 
         self.length = getDistance2Points(self.topRight[0], self.topRight[1], self.bottomRight[0], self.bottomRight[1])
         self.width = getDistance2Points(self.topRight[0], self.topRight[1], self.topLeft[0], self.topLeft[1])

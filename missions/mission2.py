@@ -3,7 +3,7 @@ import glob
 from typing import List
 import math
 from pymavlink import mavutil, mavwp
-from modules.utils import addHome, takeoffSequence, landingSequence, readlatlongFile, getBearing2Points, new_waypoint, getDistance2Points
+from modules.utils import addHome, takeoffSequence, landingSequence, readWaypoints, getBearing2Points, new_waypoint, getDistance2Points
 from modules.Fence import uploadFence
 from modules.RectPoints import RectPoints
 from modules.ImageDetector import capturePixels
@@ -14,22 +14,22 @@ import cv2
 # import time
 
 
-def startMission(uav: UAV, connectionString: str, camera: Camera, surveyAlt: float, surveySpeed: float) -> None:
+def startMission(uav: UAV, connectionString: str, camera: Camera, surveyAlt: float, surveySpeed: float, surveySquarePath, fencePath) -> None:
     camera.adjutSpacingToAlt(surveyAlt)
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
     wpLoader = mavwp.MAVWPLoader()
 
-    uploadFence(master, './data/Geofence.csv')
+    uploadFence(master, fencePath)
 
     home = addHome(master, wpLoader)
     takeoffSequence(master, wpLoader, home, uav)
 
     try:
-        recCords = readlatlongFile('./data/SearchSquare.csv')
+        recCords = readWaypoints(surveySquarePath)
     except FileNotFoundError:
         print('!!!!USING DEFAULT SEARCH SQUARE!!!!!!!!!')
-        recCords = readlatlongFile('./data/defaults/SearchSquare.csv')
+        recCords = readWaypoints('./data/defaults/SearchSquare.csv')
 
     searchRec = RectPoints(*recCords)
 

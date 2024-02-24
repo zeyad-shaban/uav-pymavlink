@@ -1,19 +1,19 @@
 from pymavlink import mavutil, mavwp
-from modules.utils import new_waypoint, readlatlongFile, addHome, takeoffSequence, landingSequence
+from modules.utils import new_waypoint, readWaypoints, addHome, takeoffSequence, landingSequence
 import numpy as np
 from modules.ObstacleAvoid import ObstacleAvoid
 from modules.Waypoint import Waypoint
 from modules.UAV import UAV
-# from modules.Fence import uploadFence
+from modules.Fence import uploadFence
 
 
-def startMission(uav: UAV, connectionString: str, payloadRadius: int = 0) -> None:
+def startMission(uav: UAV, connectionString: str, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
     wpLoader = mavwp.MAVWPLoader()
 
-    def airdropOff(payloadPath):
-        payloadCords = readlatlongFile(payloadPath)
+    def airdropOff():
+        payloadCords = readWaypoints(payloadPath)
         brng = uav.main_bearing
         d_wp = 60
         drop_alt = 60
@@ -53,16 +53,18 @@ def startMission(uav: UAV, connectionString: str, payloadRadius: int = 0) -> Non
                 msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
                 master.mav.send(wpLoader.wp(msg.seq))
 
+    uploadFence(master, fencePath)
+
     home = addHome(master, wpLoader)
     takeoffSequence(master, wpLoader, home, uav)
 
-    wpCords = ObstacleAvoid(uav, './data/Waypoints.csv', './data/Obstacles.csv')
+    wpCords = ObstacleAvoid(uav, wpPath, obsPath)
     for i, cord in enumerate(wpCords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             cord[0], cord[1], cord[2]))
 
-    airdropOff('./data/Payloads.csv')
+    airdropOff()
     landingSequence(master, wpLoader, home, uav)
 
     master.waypoint_clear_all_send()

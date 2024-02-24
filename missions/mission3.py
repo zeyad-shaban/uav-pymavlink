@@ -5,16 +5,16 @@ from modules.ObstacleAvoid import ObstacleAvoid
 from modules.Fence import uploadFence
 
 
-def startMission(uav, connectionString):
+def startMission(uav, connectionString, wpPath, obsPath, fencePath):
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
     wpLoader = mavwp.MAVWPLoader()
 
-    uploadFence(master, './data/Geofence.csv')
+    uploadFence(master, fencePath)
 
     home = addHome(master, wpLoader)
     takeoffSequence(master, wpLoader, home, uav)
-    wpCords = ObstacleAvoid(uav, './data/Waypoints.csv', './data/Obstacles.csv')
+    wpCords = ObstacleAvoid(uav, wpPath, obsPath)
     for i, cord in enumerate(wpCords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
