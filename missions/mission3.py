@@ -5,11 +5,8 @@ from modules.ObstacleAvoid import ObstacleAvoid
 from modules.Fence import uploadFence
 
 
-def startMission(uav, connectionString, wpPath, obsPath, fencePath):
-    master = mavutil.mavlink_connection(connectionString)
-    master.wait_heartbeat()
+def startMission(uav, master, wpPath, obsPath, fencePath):
     wpLoader = mavwp.MAVWPLoader()
-
     uploadFence(master, fencePath)
 
     home = addHome(master, wpLoader)

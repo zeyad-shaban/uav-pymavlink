@@ -6,7 +6,7 @@ from pymavlink import mavutil, mavwp
 from modules.utils import addHome, takeoffSequence, landingSequence, readWaypoints, getBearing2Points, new_waypoint, getDistance2Points
 from modules.Fence import uploadFence
 from modules.RectPoints import RectPoints
-from modules.ImageDetector import capturePixels
+from modules.ImageDetector import openCam, closeCam
 from modules.UAV import UAV
 from modules.Camera import Camera
 
@@ -14,10 +14,8 @@ import cv2
 # import time
 
 
-def startMission(uav: UAV, connectionString: str, camera: Camera, surveyAlt: float, surveySpeed: float, surveySquarePath, fencePath) -> None:
+def startMission(uav: UAV, master, camera: Camera, surveyAlt: float, surveySpeed: float, surveySquarePath, fencePath) -> None:
     camera.adjutSpacingToAlt(surveyAlt)
-    master = mavutil.mavlink_connection(connectionString)
-    master.wait_heartbeat()
     wpLoader = mavwp.MAVWPLoader()
 
     uploadFence(master, fencePath)
@@ -61,7 +59,17 @@ def startMission(uav: UAV, connectionString: str, camera: Camera, surveyAlt: flo
         msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
         master.mav.send(wpLoader.wp(msg.seq))
 
-    startCam(camera, master)
+    didOpenCam = False
+    didCloseCam = False
+    while True:
+        msg = master.recv_match(type='MISSION_ITEM_REACHED', blocking=True)
+        if msg.seq >= 2 and not didOpenCam:
+            openCam()
+            didOpenCam = True
+        elif msg.seq > len(cords) + 1 and not didCloseCam:
+            closeCam()
+            didCloseCam = True
+            break
 
 
 def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List[float]]:
@@ -94,35 +102,6 @@ def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List
 
     return points
 
-
-# ! TODO MUST TEST ON PIXAHAWK
-def startCam(camera: Camera, master):
-    imgPath = "./images"
-    camId = 0
-
-    os.makedirs(imgPath, exist_ok=True)
-    files = glob.glob(f"{imgPath}/*.png")
-
-    lastIndex = 0
-    if files:
-        max_number = max(int(os.path.splitext(os.path.basename(file))[0]) for file in files)
-        lastIndex = max_number + 1
-
-    cap = cv2.VideoCapture(camId)
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("!!!!!FRAME NOT READ CORRECTLY!!!!!")
-            break
-
-        captured = capturePixels(frame)
-        if captured:
-            cv2.imwrite(f'./images/{lastIndex}.png', frame)
-            lastIndex += 1
-            saveGeoCord(camera, master, captured)
-            # time.sleep(0.5)  # uncomment only if ai team didn't handle the delay
-
-    cap.release()
 
 def saveGeoCord(camera: Camera, master, cords: List[float]) -> None:
     with open("./data/Geoloc.txt", 'a') as f:

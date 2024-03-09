@@ -2,16 +2,20 @@ import cv2
 import socket
 import struct
 import pickle
+import time
+
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('192.168.1.8', 12345))
 
 s.listen(10)
 
-conn,addr=s.accept()
+conn, addr = s.accept()
 print(addr)
 data = b""
 payload_size = struct.calcsize("L")
+
+i = 0
 
 while True:
     while len(data) < payload_size:
@@ -23,7 +27,13 @@ while True:
         data += conn.recv(4096)
     frame_data = data[:msg_size]
     data = data[msg_size:]
-    frame=pickle.loads(frame_data)
-    cv2.imshow('frame',frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    frame = pickle.loads(frame_data)
+    cv2.imshow('frame', frame)
+
+    # cv2.imwrite(f"./rip_pc/{i}.png", frame)
+    i += 1
+    # time.sleep(0.5)
+
+    if cv2.waitKey(
+        1) & 0xFF == ord('q'):
         break

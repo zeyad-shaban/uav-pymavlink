@@ -7,9 +7,7 @@ from modules.UAV import UAV
 from modules.Fence import uploadFence
 
 
-def startMission(uav: UAV, connectionString: str, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
-    master = mavutil.mavlink_connection(connectionString)
-    master.wait_heartbeat()
+def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
     wpLoader = mavwp.MAVWPLoader()
 
     def airdropOff():
