@@ -103,6 +103,7 @@ def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List
     return points
 
 
+# TODO USE THIS AND HANDLE SAVING THE PLANE CORDS TO KNOW WHERE THE PLANE IS LOCATED
 def saveGeoCord(camera: Camera, master, cords: List[float]) -> None:
     with open("./data/Geoloc.txt", 'a') as f:
         xCord = cords[0]  # x
