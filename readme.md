@@ -1,4 +1,8 @@
-To run the app open main.py, import hte mission you want to run from missions directory, then run the start function of it
+Install the needed libraries with `pip install -r requirements.txt`
+*if there is a package missing in requirements.txt please add i tthere
+
+To run the app open main.py, import the mission you want to run from missions directory, then run the start function of it
+
 
 ##TODO List:
 - mission 1 configure how to reload the payload and how to launch it again (needs understanding of how the competition stuff works overall)
