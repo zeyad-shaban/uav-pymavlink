@@ -6,11 +6,14 @@ from modules.UAV import UAV
 R = 6371000.0  # Earth radius in meters
 
 
+# TODO FIX EMPTY TRAILING FAIL
 def readWaypoints(path: str) -> List[List[float]]:
     with open(path) as f:
         firstLine = next(f)
         cords = []
         for line in f:
+            if line == '\n':
+                continue
             if firstLine.startswith("n,lat,long"):
                 line = line.split(",")
                 cords.append([float(line[0]), float(line[1]), 0])
