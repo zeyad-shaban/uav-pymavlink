@@ -20,10 +20,10 @@ class UAV:
         self.grid_file = data["Files"]["searchGridFile"]
 
         #Airdrop Data H1, Vpa, Vag, angle
-        self.H1 = data["airdropData"]["aircraftAltitude"]
-        self.Vpa = data["airdropData"]["aircraftVelocity"]
-        self.Vag = data["airdropData"]["windSpeed"]
-        self.angle = data["airdropData"]["windBearing"]
+        self.aircraftAlt = data["airdropData"]["aircraftAltitude"]
+        self.aircraftVelocity = data["airdropData"]["aircraftVelocity"]
+        self.windSpeed = data["airdropData"]["windSpeed"]
+        self.windBearing = data["airdropData"]["windBearing"]
 
         self.Servo_No = data["airdropData"]["servoNo"]
         self.PWM_value = data["airdropData"]["PWMValue"]
