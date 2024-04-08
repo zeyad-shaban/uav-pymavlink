@@ -12,7 +12,7 @@ def readWaypoints(path: str) -> List[List[float]]:
         firstLine = next(f)
         cords = []
         for line in f:
-            if not line.find(','):
+            if not line.find(',') == '-1':
                 line = line.replace(' ', ',')
                 line = line.replace('\t', ',')
 
