@@ -6,7 +6,6 @@ from modules.UAV import UAV
 R = 6371000.0  # Earth radius in meters
 
 
-# TODO FIX EMPTY TRAILING FAIL
 def readWaypoints(path: str) -> List[List[float]]:
     with open(path) as f:
         firstLine = next(f)

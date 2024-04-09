@@ -7,50 +7,44 @@ from modules.UAV import UAV
 from modules.Fence import uploadFence
 
 
-def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
+def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 10) -> None:
     wpLoader = mavwp.MAVWPLoader()
 
     def airdropOff():
+        rotAdjustDistance = 70
         payloadCords = readWaypoints(payloadPath)
-        d_wp = 60
         drop_alt = 60
         altwp = 70
 
-        drop_x, drop_y = payload_drop_eq(uav.H1, uav.Vpa, uav.Vag, uav.angle)
-        drop_x = 0
+        fallDistance = payload_drop_eq(drop_alt, uav.Vpa, uav.Vag, uav.angle)
 
         lastMissionWp = wpCords[len(wpCords) - 1]
 
         for payloadCord in payloadCords:
-            brng = getBearing2Points(#lastMissionWp[0], lastMissionWp[1], payloadCord[0], payloadCord[1])
-                payloadCord[0], payloadCord[1], lastMissionWp[0], lastMissionWp[1])
+            brng = getBearing2Points(payloadCord[0], payloadCord[1], lastMissionWp[0], lastMissionWp[1])
 
-            wpBefore1_lat, wpBefore1_long = new_waypoint(
-                payloadCord[0], payloadCord[1], d_wp*2, brng)
+            wpBefore1_lat, wpBefore1_long = new_waypoint(payloadCord[0], payloadCord[1], rotAdjustDistance + fallDistance, brng)
             wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
                 master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, payloadRadius, 0, 0,
                 wpBefore1_lat, wpBefore1_long, altwp
             ))
 
-            wpBefore2_lat, wpBefore2_long = new_waypoint(
-                payloadCord[0], payloadCord[1], d_wp, brng)
+            latDrop, longDrop = new_waypoint(payloadCord[0], payloadCord[1], fallDistance, brng)
             wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
                 master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, payloadRadius, 0, 0,
-                wpBefore2_lat, wpBefore2_long, altwp
+                latDrop, longDrop, drop_alt
             ))
 
-            latDrop, longDrop = new_waypoint(
-                payloadCord[0], payloadCord[1], drop_x, brng)
             wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
                 master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, 8, 1500, 0, 0,
-                latDrop, longDrop, drop_alt))
-
-            wpAfter_lat, wpAfter_long = new_waypoint(
-                payloadCord[0], payloadCord[1], d_wp, brng-180)
-            wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-                master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-                wpAfter_lat, wpAfter_long, altwp
+                0,0,0
             ))
+
+            # wpAfter_lat, wpAfter_long = new_waypoint(payloadCord[0], payloadCord[1], fallDistance, brng-180)
+            # wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+            #     master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+            #     wpAfter_lat, wpAfter_long, altwp
+            # ))
 
             master.waypoint_clear_all_send()
             master.waypoint_count_send(wpLoader.count())
@@ -136,5 +130,4 @@ def payload_drop_eq(H1, Vpa, Vag, angle):
     print("Range of payload", (R[k-1]), "meter")
     print("££££££££££££££££££££££££££££££")
     x = R[k-1]
-    y = H1
-    return x, y
+    return x
