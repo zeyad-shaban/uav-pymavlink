@@ -61,7 +61,6 @@ def addWpAirDrop(payloadCord, d_drop, wpCords, wp_num_to_generate=10):
     return bezier_curve(points, wp_num_to_generate)
 
 def bezier_curve(points, num_points):
-    # massive thanks ramdom_player201 for explaining to me how Bazier curves works 🙏
     t_values = np.linspace(0, 1, num_points)
     bezier_points = np.zeros((num_points, 2))
 
