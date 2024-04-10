@@ -5,51 +5,14 @@ from modules.ObstacleAvoid import ObstacleAvoid
 from modules.Waypoint import Waypoint
 from modules.UAV import UAV
 from modules.Fence import uploadFence
+from math import comb
 
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
+    altwp = 70
     wpLoader = mavwp.MAVWPLoader()
     wpCords = ObstacleAvoid(uav, wpPath, obsPath)
     payloadCords = readWaypoints(payloadPath)
-    drop_x, drop_y = payload_drop_eq(uav.H1, uav.Vpa, uav.Vag, uav.angle)
-
-    def addWpAirDrop(payloadCord, d_drop):
-        d_wp = 60
-        drop_alt = 60
-        altwp = 70
-
-        lastMissionWp = wpCords[len(wpCords) - 1]
-
-        brng = getBearing2Points(payloadCord[0], payloadCord[1], lastMissionWp[0], lastMissionWp[1])
-        Lat_drop, Long_drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, brng)
-        wpAfter_lat, wpAfter_long = new_waypoint(Lat_drop, Long_drop, d_wp, brng-180)
-        wpBefore2_lat, wpBefore2_long = new_waypoint(Lat_drop, Long_drop, d_wp, brng)
-        wpBefore1_lat, wpBefore1_long = new_waypoint(Lat_drop, Long_drop, d_wp*2, brng)
-
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            wpBefore1_lat, wpBefore1_long, altwp))
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            wpBefore2_lat, wpBefore2_long, altwp))
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, payloadRadius, 0, 0,
-            Lat_drop, Long_drop, drop_alt))
-
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,
-            Lat_drop, Long_drop, drop_alt))
-
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            wpAfter_lat, wpAfter_long, altwp))
-
-        master.waypoint_clear_all_send()
-        master.waypoint_count_send(wpLoader.count())
-
-        for i in range(wpLoader.count()):
-            msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
-            master.mav.send(wpLoader.wp(msg.seq))
 
     uploadFence(master, fencePath)
 
@@ -61,17 +24,52 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             cord[0], cord[1], cord[2]))
 
+    drop_x, _ = payload_drop_eq(uav.H1, uav.Vpa, uav.Vag, uav.angle)
     for payloadCord in payloadCords:
-        addWpAirDrop(payloadCord, drop_x)
-    landingSequence(master, wpLoader, home, uav)
+        adjustingWps = addWpAirDrop(payloadCord, drop_x, wpCords)
+
+        for wp in adjustingWps:
+            wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+                master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+                wp[0], wp[1], altwp))
+
+        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,
+            0, 0, 0))
+
+    # landingSequence(master, wpLoader, home, uav)
 
     master.waypoint_clear_all_send()
     master.waypoint_count_send(wpLoader.count())
-
     for _ in range(wpLoader.count()):
         msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
         master.mav.send(wpLoader.wp(msg.seq))
 
+
+def addWpAirDrop(payloadCord, d_drop, wpCords, wp_num_to_generate=10):
+    d = 60
+    lastWp = wpCords[len(wpCords) - 1]
+    beforeLastWp = wpCords[len(wpCords) - 2]
+
+    payloadToPlaneBrng = getBearing2Points(payloadCord[0], payloadCord[1], lastWp[0], lastWp[1])
+    planeBrng = getBearing2Points(beforeLastWp[0], beforeLastWp[1], lastWp[0], lastWp[1])
+
+    secWp = new_waypoint(lastWp[0], lastWp[1], d, planeBrng)
+    drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, payloadToPlaneBrng)
+
+    points = np.array([item[:2] for item in [lastWp, secWp, drop, payloadCord]])
+    return bezier_curve(points, wp_num_to_generate)
+
+def bezier_curve(points, num_points):
+    # massive thanks ramdom_player201 for explaining to me how Bazier curves works 🙏
+    t_values = np.linspace(0, 1, num_points)
+    bezier_points = np.zeros((num_points, 2))
+
+    for i, t in enumerate(t_values):
+        for j, point in enumerate(points):
+            bezier_points[i] += comb(len(points) - 1, j) * (1 - t)**(len(points) - 1 - j) * t**j * point
+
+    return bezier_points
 
 def payload_drop_eq(H1, Vpa, Vag, angle):
     g = 9.81  # acceleration due to gravity
