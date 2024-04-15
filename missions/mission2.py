@@ -10,7 +10,6 @@ from modules.ImageDetector import openCam, closeCam
 from modules.UAV import UAV
 from modules.Camera import Camera
 
-import cv2
 # import time
 
 

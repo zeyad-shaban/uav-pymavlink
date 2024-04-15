@@ -37,7 +37,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
             master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,
             0, 0, 0))
 
-    # landingSequence(master, wpLoader, home, uav)
+    landingSequence(master, wpLoader, home, uav)
 
     master.waypoint_clear_all_send()
     master.waypoint_count_send(wpLoader.count())
