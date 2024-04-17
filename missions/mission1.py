@@ -47,17 +47,17 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
 
 
 def addWpAirDrop(payloadCord, d_drop, wpCords, wp_num_to_generate=10):
-    d = 60
+    plane_d = 400
     lastWp = wpCords[len(wpCords) - 1]
     beforeLastWp = wpCords[len(wpCords) - 2]
 
     payloadToPlaneBrng = getBearing2Points(payloadCord[0], payloadCord[1], lastWp[0], lastWp[1])
     planeBrng = getBearing2Points(beforeLastWp[0], beforeLastWp[1], lastWp[0], lastWp[1])
 
-    secWp = new_waypoint(lastWp[0], lastWp[1], d, planeBrng)
+    secWp = new_waypoint(lastWp[0], lastWp[1], plane_d, planeBrng)
     drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, payloadToPlaneBrng)
-    
-    wpBeforeDrop = new_waypoint(drop[0], drop[1], 0.1, payloadToPlaneBrng)
+
+    wpBeforeDrop = new_waypoint(drop[0], drop[1], d_drop * 2, payloadToPlaneBrng)
 
     points = np.array([item[:2] for item in [lastWp, secWp, wpBeforeDrop, drop]])
     return bezier_curve(points, wp_num_to_generate)
