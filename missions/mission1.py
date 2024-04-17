@@ -37,7 +37,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
             master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,
             0, 0, 0))
 
-    landingSequence(master, wpLoader, home, uav)
+    # landingSequence(master, wpLoader, home, uav)
 
     master.waypoint_clear_all_send()
     master.waypoint_count_send(wpLoader.count())
@@ -56,9 +56,12 @@ def addWpAirDrop(payloadCord, d_drop, wpCords, wp_num_to_generate=10):
 
     secWp = new_waypoint(lastWp[0], lastWp[1], d, planeBrng)
     drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, payloadToPlaneBrng)
+    
+    wpBeforeDrop = new_waypoint(drop[0], drop[1], 0.1, payloadToPlaneBrng)
 
-    points = np.array([item[:2] for item in [lastWp, secWp, drop, payloadCord]])
+    points = np.array([item[:2] for item in [lastWp, secWp, wpBeforeDrop, drop]])
     return bezier_curve(points, wp_num_to_generate)
+
 
 def bezier_curve(points, num_points):
     t_values = np.linspace(0, 1, num_points)
@@ -69,6 +72,7 @@ def bezier_curve(points, num_points):
             bezier_points[i] += comb(len(points) - 1, j) * (1 - t)**(len(points) - 1 - j) * t**j * point
 
     return bezier_points
+
 
 def payload_drop_eq(H1, Vpa, Vag, angle):
     g = 9.81  # acceleration due to gravity
