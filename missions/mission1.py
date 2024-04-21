@@ -48,8 +48,8 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
 
 
 def addWpAirDrop(payloadCord, d_drop, wpCords, fenceCords, wp_num_to_generate=10):
-    plane_d = 200
-    before_drop_d = 500
+    plane_d = 200 
+    before_drop_d = 500 
     lastWp = wpCords[len(wpCords) - 1]
     beforeLastWp = wpCords[len(wpCords) - 2]
 
@@ -61,35 +61,39 @@ def addWpAirDrop(payloadCord, d_drop, wpCords, fenceCords, wp_num_to_generate=10
     wpBeforeDrop = new_waypoint(drop[0], drop[1], before_drop_d, 90)
 
     points = np.array([item[:2] for item in [lastWp, secWp, wpBeforeDrop, drop]])
-    return bezier_curve(points, wp_num_to_generate)
+
+    curvePoints, withinFence = bezier_curve(points, wp_num_to_generate, fenceCords)
+    print(f'WITHIN FENCE: {withinFence}')
+    return curvePoints
 
 
-def bezier_curve(points, num_points):
+def is_point_within_fence(point, fenceCords):
+    x, y = point
+    polyCords = [(lat, long) for lat, long, _ in fenceCords]
+    num = len(polyCords)
+    j = num - 1
+    c = False
+    for i in range(num):
+        if ((polyCords[i][1] > y) != (polyCords[j][1] > y)) and \
+                (x < polyCords[i][0] + (polyCords[j][0] - polyCords[i][0]) * (y - polyCords[i][1]) /
+                                  (polyCords[j][1] - polyCords[i][1])):
+            c = not c
+        j = i
+    return c
+
+
+def bezier_curve(points, num_points, fenceCords):
     t_values = np.linspace(0, 1, num_points)
     bezier_points = np.zeros((num_points, 2))
-
-    farthest_points = {
-        'max_lat': float('-inf'),
-        'max_long': float('-inf'),
-        'min_lat': float('inf'),
-        'min_long': float('inf')
-    }
 
     for i, t in enumerate(t_values):
         for j, point in enumerate(points):
             bezier_points[i] += comb(len(points) - 1, j) * (1 - t)**(len(points) - 1 - j) * t**j * point
 
-        lat, long = bezier_points[i]
-        if (lat > farthest_points['max_lat']):
-            farthest_points['max_lat'] = lat
-        if (long > farthest_points['max_long']):
-            farthest_points['max_long'] = long
-        if (lat < farthest_points['min_lat']):
-            farthest_points['min_lat'] = lat
-        if (long < farthest_points['min_long']):
-            farthest_points['min_long'] = long
+    # Check if all points are within the fence
+    all_points_within_fence = all(is_point_within_fence(point, fenceCords) for point in bezier_points)
 
-    return bezier_points, farthest_points
+    return bezier_points, all_points_within_fence
 
 
 def payload_drop_eq(H1, Vpa, Vag, angle):
