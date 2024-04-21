@@ -85,6 +85,17 @@ def getBearing2Points(lat1, long1, lat2, long2):
     i = math.atan2(y, x)
     return (i * 180 / math.pi + 360) % 360
 
+from shapely.geometry import Point, Polygon
+
+def isPointInFence(lat, lon, fence, extendDistance=0):
+    point = Point(lat, lon)
+    polygon = Polygon(fence[:4])
+    
+    safety_distance_degrees = extendDistance / 111139
+    buffered_polygon = polygon.buffer(safety_distance_degrees)
+    
+    return buffered_polygon.contains(point)
+
 
 def addHome(master, wpLoader):
     msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
