@@ -13,6 +13,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
     wpLoader = mavwp.MAVWPLoader()
     wpCords = ObstacleAvoid(uav, wpPath, obsPath)
     payloadCords = readWaypoints(payloadPath)
+    fenceCords = readWaypoints(fencePath)
 
     uploadFence(master, fencePath)
 
@@ -26,7 +27,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
 
     drop_x, _ = payload_drop_eq(uav.H1, uav.Vpa, uav.Vag, uav.angle)
     for payloadCord in payloadCords:
-        adjustingWps = addWpAirDrop(payloadCord, drop_x, wpCords)
+        adjustingWps = addWpAirDrop(payloadCord, drop_x, wpCords, fenceCords)
 
         for wp in adjustingWps:
             wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
@@ -46,19 +47,18 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
         master.mav.send(wpLoader.wp(msg.seq))
 
 
-def addWpAirDrop(payloadCord, d_drop, wpCords, wp_num_to_generate=5):
+def addWpAirDrop(payloadCord, d_drop, wpCords, fenceCords, wp_num_to_generate=10):
     plane_d = 200
     before_drop_d = 500
     lastWp = wpCords[len(wpCords) - 1]
     beforeLastWp = wpCords[len(wpCords) - 2]
 
-    payloadToPlaneBrng = getBearing2Points(payloadCord[0], payloadCord[1], lastWp[0], lastWp[1])
     planeBrng = getBearing2Points(beforeLastWp[0], beforeLastWp[1], lastWp[0], lastWp[1])
 
     secWp = new_waypoint(lastWp[0], lastWp[1], plane_d, planeBrng)
-    drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, payloadToPlaneBrng)
+    drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, -planeBrng)
 
-    wpBeforeDrop = new_waypoint(drop[0], drop[1], before_drop_d, payloadToPlaneBrng)
+    wpBeforeDrop = new_waypoint(drop[0], drop[1], before_drop_d, 90)
 
     points = np.array([item[:2] for item in [lastWp, secWp, wpBeforeDrop, drop]])
     return bezier_curve(points, wp_num_to_generate)
@@ -68,11 +68,28 @@ def bezier_curve(points, num_points):
     t_values = np.linspace(0, 1, num_points)
     bezier_points = np.zeros((num_points, 2))
 
+    farthest_points = {
+        'max_lat': float('-inf'),
+        'max_long': float('-inf'),
+        'min_lat': float('inf'),
+        'min_long': float('inf')
+    }
+
     for i, t in enumerate(t_values):
         for j, point in enumerate(points):
             bezier_points[i] += comb(len(points) - 1, j) * (1 - t)**(len(points) - 1 - j) * t**j * point
 
-    return bezier_points
+        lat, long = bezier_points[i]
+        if (lat > farthest_points['max_lat']):
+            farthest_points['max_lat'] = lat
+        if (long > farthest_points['max_long']):
+            farthest_points['max_long'] = long
+        if (lat < farthest_points['min_lat']):
+            farthest_points['min_lat'] = lat
+        if (long < farthest_points['min_long']):
+            farthest_points['min_long'] = long
+
+    return bezier_points, farthest_points
 
 
 def payload_drop_eq(H1, Vpa, Vag, angle):
