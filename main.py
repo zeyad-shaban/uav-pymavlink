@@ -1,5 +1,5 @@
 from pymavlink import mavutil
-from missions import mission1, mission2, mission3
+from missions import mission1, mission2, mission3, mission1_bezier
 from modules.UAV import UAV
 from modules.Camera import Camera
 
@@ -19,6 +19,7 @@ if __name__ == "__main__":
     fencePath = './data/Geofence.csv'
     surveySquare = './data/SearchSquare.csv'
 
-    mission1.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
+    mission1_bezier.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
+    # mission1.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
     # mission2.startMission(uav, master, sonya6000, surveyAlt=80, surveySpeed=10, surveySquarePath=surveySquare, fencePath=fencePath)
     # mission3.startMission(uav, master, wpPath=wpPath, obsPath=obsPath, fencePath=fencePath)
