@@ -46,30 +46,54 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
         master.mav.send(wpLoader.wp(msg.seq))
 
 
-def addWpAirDrop(payloadCord, d_drop, wpCords, fenceCords, safetyDistance=10, wp_num_to_generate=30):
-    plane_d = 200
-    before_drop_d = 500
+def addWpAirDrop(payloadCord, d_drop, wpCords, fenceCords, safetyDistance=10, wp_num_to_generate=5):
+    BEARING_COEFF = 1.1
+    MAX_BEFORE_DROP_D = 500
+    plane_d = 20
+
     lastWp = wpCords[len(wpCords) - 1]
     beforeLastWp = wpCords[len(wpCords) - 2]
 
     payloadToPlaneBrng = getBearing2Points(payloadCord[0], payloadCord[1], lastWp[0], lastWp[1])
     planeBrng = getBearing2Points(beforeLastWp[0], beforeLastWp[1], lastWp[0], lastWp[1])
 
-    secWp = new_waypoint(lastWp[0], lastWp[1], plane_d, planeBrng)
+    bearing_diff = abs((payloadToPlaneBrng+180) - planeBrng)
+    bearing_diff = abs(min(360 - bearing_diff, bearing_diff))
+
+    before_drop_d = min(MAX_BEFORE_DROP_D, bearing_diff * BEARING_COEFF)
+
+    print(bearing_diff)
+    print(f"Before drop d: {before_drop_d}")
 
     dropBrng = payloadToPlaneBrng
     direction = np.sign((payloadToPlaneBrng - planeBrng + 180) % 360 - 180)
 
-    withinFence = False
-    while not withinFence:
+    secWp = new_waypoint(lastWp[0], lastWp[1], plane_d, planeBrng)
+
+    min_distance = float('inf')
+    best_dropBrng = None
+
+    while True:
         drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, dropBrng)
         wpBeforeDrop = new_waypoint(drop[0], drop[1], before_drop_d, dropBrng)
 
         points = np.array([item[:2] for item in [lastWp, secWp, wpBeforeDrop, drop]])
         curvePnts = bezier_curve(points, 30)
-        withinFence = all(isPointInFence(point[0], point[1], fenceCords, -safetyDistance) for point in curvePnts)
+        maxDistanceToFence = max([isPointInFence(point[0], point[1], fenceCords, -safetyDistance) for point in curvePnts])
 
-        dropBrng += 10 * direction * (not withinFence)
+        if (maxDistanceToFence < min_distance):
+            best_dropBrng = dropBrng
+            min_distance = maxDistanceToFence
+
+        if (dropBrng > payloadToPlaneBrng + 360 or dropBrng < payloadToPlaneBrng - 360 or min_distance <= 0):
+            break
+
+        dropBrng += 1 * direction
+
+    drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, best_dropBrng)
+    wpBeforeDrop = new_waypoint(drop[0], drop[1], before_drop_d, best_dropBrng)
+
+    points = np.array([item[:2] for item in [lastWp, secWp, wpBeforeDrop, drop]])
 
     return bezier_curve(points, wp_num_to_generate)
 

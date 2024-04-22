@@ -1,3 +1,5 @@
+from shapely.geometry import Point, Polygon
+from shapely.ops import nearest_points
 import math
 from typing import List
 from pymavlink import mavutil
@@ -85,16 +87,21 @@ def getBearing2Points(lat1, long1, lat2, long2):
     i = math.atan2(y, x)
     return (i * 180 / math.pi + 360) % 360
 
-from shapely.geometry import Point, Polygon
 
 def isPointInFence(lat, lon, fence, extendDistance=0):
     point = Point(lat, lon)
     polygon = Polygon(fence[:4])
-    
+
     safety_distance_degrees = extendDistance / 111139
     buffered_polygon = polygon.buffer(safety_distance_degrees)
-    
-    return buffered_polygon.contains(point)
+
+    nearestPnt = nearest_points(point, buffered_polygon)[1]
+    distance = point.distance(nearestPnt)
+
+    if buffered_polygon.contains(point):
+        return -distance
+
+    return distance
 
 
 def addHome(master, wpLoader):
