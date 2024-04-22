@@ -47,19 +47,26 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
 
 
 def addWpAirDrop(payloadCord, d_drop, wpCords, fenceCords, safetyDistance=10, wp_num_to_generate=10):
-
     lastWp = wpCords[len(wpCords) - 1]
     beforeLastWp = wpCords[len(wpCords) - 2]
 
     payloadToPlaneBrng = getBearing2Points(payloadCord[0], payloadCord[1], lastWp[0], lastWp[1])
     planeBrng = getBearing2Points(beforeLastWp[0], beforeLastWp[1], lastWp[0], lastWp[1])
 
+    # WHAT TO DO WITH THAT
     bearing_diff = abs((payloadToPlaneBrng+180) - planeBrng)
     bearing_diff = abs(min(360 - bearing_diff, bearing_diff))
-    distance = getDistance2Points(lastWp[0], lastWp[1], payloadCord[0], payloadCord[1])
-    print(distance)
-    plane_d = 5000 / distance
-    before_drop_d = 5000 / distance
+    distanceToPayload = getDistance2Points(lastWp[0], lastWp[1], payloadCord[0], payloadCord[1])
+
+    plane_d = 10
+    before_drop_d = 10
+
+    plane_d_safe = 200
+    before_drop_d_safe = 500
+
+    if distanceToPayload < 50 + d_drop or bearing_diff > 90:
+        plane_d = plane_d_safe
+        before_drop_d = before_drop_d_safe
 
     dropBrng = payloadToPlaneBrng
     direction = np.sign((payloadToPlaneBrng - planeBrng + 180) % 360 - 180)
