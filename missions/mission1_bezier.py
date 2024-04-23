@@ -28,10 +28,16 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
     for payloadCord in payloadCords:
         adjustingWps = addWpAirDrop(payloadCord, drop_x, wpCords, fenceCords)
 
-        for wp in adjustingWps:
+        for i in range(len(adjustingWps) - 1):
+            wp = adjustingWps[i]
             wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
                 master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
                 wp[0], wp[1], altwp))
+
+        wp = adjustingWps[len(adjustingWps) - 1]
+        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 5, 0, 0,
+            wp[0], wp[1], altwp))
 
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,
@@ -46,7 +52,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
         master.mav.send(wpLoader.wp(msg.seq))
 
 
-def addWpAirDrop(payloadCord, d_drop, wpCords, fenceCords, safetyDistance=10, wp_num_to_generate=10):
+def addWpAirDrop(payloadCord, d_drop, wpCords, fenceCords, safetyDistance=25, wp_num_to_generate=10):
     lastWp = wpCords[len(wpCords) - 1]
     beforeLastWp = wpCords[len(wpCords) - 2]
 
