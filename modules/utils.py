@@ -26,7 +26,7 @@ def readWaypoints(path: str) -> List[List[float]]:
                 line = line.split(",")
                 cords.append([float(line[0]), float(line[1]), float(line[2])])
             elif firstLine.startswith("QGC WPL 110"):
-                line = line.split('\t')
+                line = line.split(',')
                 cords.append([float(line[8]), float(line[9]), float(line[10])])
 
             else:
