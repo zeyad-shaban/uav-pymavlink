@@ -6,7 +6,7 @@ from modules.Camera import Camera
 
 if __name__ == "__main__":
     uav = UAV("./data/Data.json")
-    connectionString = "udpin:172.29.240.1:14550"
+    connectionString = "udpin:172.27.208.1:14550"
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
 
@@ -19,7 +19,6 @@ if __name__ == "__main__":
     fencePath = './data/Geofence.csv'
     surveySquare = './data/SearchSquare.csv'
 
-    mission1_bezier.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
-    # mission1.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
+    # mission1_bezier.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
     # mission2.startMission(uav, master, sonya6000, surveyAlt=80, surveySpeed=10, surveySquarePath=surveySquare, fencePath=fencePath)
     # mission3.startMission(uav, master, wpPath=wpPath, obsPath=obsPath, fencePath=fencePath)
