@@ -5,20 +5,16 @@ class Program
     {
         Waypoint[][] population = Genetic.CreatePopulation(CodeParams.CHROMOSOME_SIZE);
 
-        double angle = WaypointsMath.AngleBetween3Points(
-        new Waypoint(5, 0),
-        new Waypoint(0, 0),
-        new Waypoint(5, 5)
-
-// new Waypoint(29.8186972, 30.8258772), // center
-// new Waypoint(29.8167331, 30.8255768),
-// new Waypoint(29.8185668, 30.8278835)
-        );
-        Console.WriteLine(angle);
-
+        float[] fitness = new float[population.Length];
         for (int generationsCount = 0; generationsCount < CodeParams.MAX_GENERATIONS; ++generationsCount)
         {
-            // float[] fitness = Genetic.MeasureFitness(population);
+            fitness = Genetic.MeasureFitness(fitness, population, MissionParams.BeforeStart, MissionParams.Start, MissionParams.Target);
+            Array.Sort(fitness, population);
+
+            Genetic.Reproduce(population);
         }
+
+        Console.WriteLine(fitness[0]);
+        WaypointPrinter.PrintWaypoints(population[0]);
     }
 }

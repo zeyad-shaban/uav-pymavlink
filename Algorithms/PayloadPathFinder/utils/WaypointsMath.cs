@@ -1,22 +1,54 @@
 public static class WaypointsMath
 {
-    public static double ToRadians(double degrees)
+    public static double AngleBetween3Points(Waypoint p, Waypoint center, Waypoint r)
     {
-        return degrees * Math.PI / 180;
+        double a = HaversineDistance(center, p);
+        double b = HaversineDistance(p, r);
+        double c = HaversineDistance(center, r);
+
+        double angle = Math.Acos((Math.Pow(a, 2) + Math.Pow(c, 2) - Math.Pow(b, 2)) / (2 * a * c));
+
+        return angle * 180 / Math.PI;
     }
 
+    public static double GetDistanceBetweenWaypoints(Waypoint point1, Waypoint point2)
+    {
+        double R = 6371e3; // Earth's radius in meters
 
-    public static double AngleBetween3Points(Waypoint p, Waypoint q, Waypoint r)
-    { // where p1 is the center
-        double a = Math.Sqrt(Math.Pow(p.Lat - q.Lat, 2) + Math.Pow(q.Long - q.Long, 2));
-        double b = Math.Sqrt(Math.Pow(p.Lat - r.Lat, 2) + Math.Pow(p.Long - r.Long, 2));
-        double c = Math.Sqrt(Math.Pow(q.Lat - r.Lat, 2) + Math.Pow(q.Long - r.Long, 2));
+        double lat1Rad = DegreesToRadians(point1.Lat);
+        double lat2Rad = DegreesToRadians(point2.Lat);
+        double deltaLatRad = DegreesToRadians(point2.Lat - point1.Lat);
+        double deltaLonRad = DegreesToRadians(point2.Long - point1.Long);
 
+        double a = Math.Sin(deltaLatRad / 2) * Math.Sin(deltaLatRad / 2) +
+                   Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                   Math.Sin(deltaLonRad / 2) * Math.Sin(deltaLonRad / 2);
 
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
 
-        
-        double angle = 0;
+        return R * c;
+    }
 
-        return angle;
+    private static double HaversineDistance(Waypoint point1, Waypoint point2)
+    {
+        double R = 6371e3; // Earth's radius in meters
+
+        double lat1Rad = DegreesToRadians(point1.Lat);
+        double lat2Rad = DegreesToRadians(point2.Lat);
+        double deltaLatRad = DegreesToRadians(point2.Lat - point1.Lat);
+        double deltaLonRad = DegreesToRadians(point2.Long - point1.Long);
+
+        double a = Math.Sin(deltaLatRad / 2) * Math.Sin(deltaLatRad / 2) +
+                   Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                   Math.Sin(deltaLonRad / 2) * Math.Sin(deltaLonRad / 2);
+
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+        return R * c;
+    }
+
+    private static double DegreesToRadians(double degrees)
+    {
+        return degrees * Math.PI / 180;
     }
 }
