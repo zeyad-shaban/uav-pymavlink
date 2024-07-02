@@ -21,50 +21,50 @@ public static class Genetic
 
     public static float[] MeasureFitness(float[] fitness, Waypoint[][] population, Waypoint beforeStart, Waypoint start, Waypoint target)
     {
-        for (int indivIdx = 0; indivIdx < population.Length; ++indivIdx)
-        {
-            double totalDistance = 0;
-            Waypoint[] individual = population[indivIdx];
+        // for (int indivIdx = 0; indivIdx < population.Length; ++indivIdx)
+        // {
+        //     double totalDistance = 0;
+        //     Waypoint[] individual = population[indivIdx];
 
-            Waypoint lastWp = individual[^1];
-            double distance = WaypointsMath.GetDistanceBetweenWaypoints(lastWp, target);
-            double angle = WaypointsMath.AngleBetween3Points(individual[^2], lastWp, target);
+        //     Waypoint lastWp = individual[^1];
+        //     double distance = WaypointsMath.GetDistanceBetweenWaypoints(lastWp, target);
+        //     double angle = WaypointsMath.AngleBetween3Points(individual[^2], lastWp, target);
 
 
-            if (distance < DesignParams.MIN_THROW_DISTANCE_IN_METERS ||
-                distance > DesignParams.MAX_WP_SPACING ||
-                angle < DesignParams.MAX_TURN_ANGLE
-                )
-            {
-                fitness[indivIdx] = float.MaxValue;
-                continue;
-            }
+        //     if (distance < DesignParams.MIN_THROW_DISTANCE_IN_METERS ||
+        //         distance > DesignParams.MAX_WP_SPACING ||
+        //         angle < DesignParams.MIN_TURN_RADIUS
+        //         )
+        //     {
+        //         fitness[indivIdx] = float.MaxValue;
+        //         continue;
+        //     }
 
-            totalDistance += distance;
+        //     totalDistance += distance;
 
-            for (int wpIdx = 0; wpIdx < population[indivIdx].Length; ++wpIdx)
-            {
-                Waypoint currWaypoint = individual[wpIdx];
-                Waypoint before = wpIdx == 0 ? start : individual[wpIdx - 1];
-                Waypoint beforeBefore = wpIdx == 0 ? beforeStart : (wpIdx == 1 ? start : individual[wpIdx - 2]);
+        //     for (int wpIdx = 0; wpIdx < population[indivIdx].Length; ++wpIdx)
+        //     {
+        //         Waypoint currWaypoint = individual[wpIdx];
+        //         Waypoint before = wpIdx == 0 ? start : individual[wpIdx - 1];
+        //         Waypoint beforeBefore = wpIdx == 0 ? beforeStart : (wpIdx == 1 ? start : individual[wpIdx - 2]);
 
-                angle = WaypointsMath.AngleBetween3Points(before, currWaypoint, beforeBefore);
-                distance = WaypointsMath.GetDistanceBetweenWaypoints(before, currWaypoint);
+        //         angle = WaypointsMath.AngleBetween3Points(before, currWaypoint, beforeBefore);
+        //         distance = WaypointsMath.GetDistanceBetweenWaypoints(before, currWaypoint);
 
-                if (distance > DesignParams.MAX_WP_SPACING ||
-                    distance < DesignParams.MIN_WP_SPACING ||
-                    angle < DesignParams.MAX_TURN_ANGLE
-                    )
-                {
-                    totalDistance = double.MaxValue;
-                    break;
-                }
+        //         if (distance > DesignParams.MAX_WP_SPACING ||
+        //             distance < DesignParams.MIN_WP_SPACING ||
+        //             angle < DesignParams.MIN_TURN_RADIUS
+        //             )
+        //         {
+        //             totalDistance = double.MaxValue;
+        //             break;
+        //         }
 
-                totalDistance += distance;
+        //         totalDistance += distance;
 
-            }
-            fitness[indivIdx] = (float)totalDistance;
-        }
+        //     }
+        //     fitness[indivIdx] = (float)totalDistance;
+        // }
 
         return fitness;
     }

@@ -1,5 +1,9 @@
 public static class WaypointsMath
 {
+    public static bool IsBelowMaxTurnRadius()
+    {
+        // edit this function, and please provide a full solution fo the function and use all the parameters you need
+    }
     public static double AngleBetween3Points(Waypoint p, Waypoint center, Waypoint r)
     {
         double a = HaversineDistance(center, p);
@@ -8,7 +12,7 @@ public static class WaypointsMath
 
         double angle = Math.Acos((Math.Pow(a, 2) + Math.Pow(c, 2) - Math.Pow(b, 2)) / (2 * a * c));
 
-        return angle * 180 / Math.PI;
+        return angle; //  * 180 / Math.PI; // uncomment to return degrees instead of rad
     }
 
     public static double GetDistanceBetweenWaypoints(Waypoint point1, Waypoint point2)

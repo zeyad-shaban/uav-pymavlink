@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+
 public static class CodeParams
 {
     // code related
@@ -26,9 +28,10 @@ public static class MissionParams
 
 public static class DesignParams
 {
-    static public float MAX_TURN_ANGLE = 45;
     static public float MIN_THROW_DISTANCE_IN_METERS = 40;
 
-    static public float MAX_WP_SPACING = 100;
-    static public float MIN_WP_SPACING = 50;
+    static public float MIN_TURN_RADIUS_IN_METERS = 45; // meters
+    static public float PLANE_SPEED = 25; // m per sec
+
+    static public float MAX_TURN_RATE = PLANE_SPEED / MIN_TURN_RADIUS_IN_METERS;
 }
