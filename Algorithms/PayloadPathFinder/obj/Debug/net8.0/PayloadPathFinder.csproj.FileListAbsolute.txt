@@ -1,0 +1,15 @@
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\bin\Debug\net8.0\PayloadPathFinder.exe
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\bin\Debug\net8.0\PayloadPathFinder.deps.json
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\bin\Debug\net8.0\PayloadPathFinder.runtimeconfig.json
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\bin\Debug\net8.0\PayloadPathFinder.dll
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\bin\Debug\net8.0\PayloadPathFinder.pdb
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\PayloadPathFinder.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\PayloadPathFinder.AssemblyInfoInputs.cache
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\PayloadPathFinder.AssemblyInfo.cs
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\PayloadPathFinder.csproj.CoreCompileInputs.cache
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\PayloadPathFinder.sourcelink.json
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\PayloadPathFinder.dll
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\refint\PayloadPathFinder.dll
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\PayloadPathFinder.pdb
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\PayloadPathFinder.genruntimeconfig.cache
+c:\Users\zeyad\Desktop\Workspace\Roben\uav-pymavlink\Algorithms\PayloadPathFinder\obj\Debug\net8.0\ref\PayloadPathFinder.dll

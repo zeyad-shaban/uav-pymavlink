@@ -4,6 +4,7 @@ import math
 from typing import List
 from pymavlink import mavutil
 from modules.UAV import UAV
+import re
 
 R = 6371000.0  # Earth radius in meters
 
@@ -16,6 +17,7 @@ def readWaypoints(path: str) -> List[List[float]]:
             if not line.find(',') == '-1':
                 line = line.replace(' ', ',')
                 line = line.replace('\t', ',')
+                line = re.sub(r',+', ',', line)
 
             if line == '\n':
                 continue
