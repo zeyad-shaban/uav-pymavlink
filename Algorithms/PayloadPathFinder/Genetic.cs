@@ -22,11 +22,12 @@ public static class Genetic
     public static float[] MeasureFitness(float[] fitness, Waypoint[][] population, Waypoint beforeStart, Waypoint start, Waypoint target)
     {
         int invalidTurnPenality = 1500;
-        int invalidThrowDistPenality = 2000;
 
         for (int indivIdx = 0; indivIdx < population.Length; ++indivIdx)
         {
             double score = 0;
+            double requiredRadius;
+            double arcLength;
             Waypoint[] individual = population[indivIdx];
 
             for (int wpIdx = 0; wpIdx < population[indivIdx].Length; ++wpIdx)
@@ -35,15 +36,16 @@ public static class Genetic
                 Waypoint before = wpIdx == 0 ? start : individual[wpIdx - 1];
                 Waypoint beforeBefore = wpIdx == 0 ? beforeStart : (wpIdx == 1 ? start : individual[wpIdx - 2]);
 
-                if (!WaypointsMath.IsValidTurn(beforeBefore, before, currWaypoint)) score += invalidTurnPenality;
-                score += WaypointsMath.GetArcLengthLast2Wp(beforeBefore, before, currWaypoint);
+                (requiredRadius, arcLength) = UavTurnerCalculator.CalculateTurningRadiusAndArcLength(beforeBefore, before, currWaypoint);
+                if (requiredRadius < DesignParams.MIN_TURN_RADIUS) score += invalidTurnPenality;
+                score += arcLength;
 
             }
 
-            double distToTarget = WaypointsMath.GetArcLengthLast2Wp(individual[^2], individual[^1], target);
-            if (distToTarget >= DesignParams.MAX_THROW_DIST) score += invalidThrowDistPenality;
+            (requiredRadius, arcLength) = UavTurnerCalculator.CalculateTurningRadiusAndArcLength(individual[^2], individual[^1], target);
+            if (requiredRadius < DesignParams.MIN_TURN_RADIUS) score += invalidTurnPenality * 2;
+            score += arcLength;
 
-            score += distToTarget;
             fitness[indivIdx] = (float)score;
         }
 
