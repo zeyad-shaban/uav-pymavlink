@@ -1,25 +1,25 @@
 
 public static class Genetic
 {
-    public static Waypoint[][] CreatePopulation(int chromosomeSize)
+    public static Waypoint[][] CreatePopulation(int chromosomeSize, Waypoint target)
     {
+        Random random = new();
         Waypoint[][] population = new Waypoint[CodeParams.POPULATION_SIZE][];
 
         for (int i = 0; i < population.Length; ++i)
         {
-            population[i] = new Waypoint[CodeParams.CHROMOSOME_SIZE];
+            population[i] = new Waypoint[CodeParams.CHROMOSOME_SIZE + 1];
             for (int geneIdx = 0; geneIdx < chromosomeSize; ++geneIdx)
             {
                 population[i][geneIdx] = WaypointGenerator.GenerateRandomWaypoint();
             }
+            population[i][^1] = new Waypoint(target.Lat, target.Long, random.Next(0, 360));
         }
-
-
 
         return population;
     }
 
-    public static float[] MeasureFitness(float[] fitness, Waypoint[][] population, Waypoint beforeStart, Waypoint start, Waypoint target)
+    public static float[] MeasureFitness(float[] fitness, Waypoint[][] population, Waypoint beforeStart, Waypoint start)
     {
         int invalidTurnPenality = 1500;
 
@@ -42,10 +42,6 @@ public static class Genetic
 
             }
 
-            (requiredRadius, arcLength) = UavTurnerCalculator.CalculateTurningRadiusAndArcLength(individual[^2], individual[^1], target);
-            if (requiredRadius < DesignParams.MIN_TURN_RADIUS) score += invalidTurnPenality * 2;
-            score += arcLength;
-
             fitness[indivIdx] = (float)score;
         }
 
@@ -56,17 +52,32 @@ public static class Genetic
     {
         Random random = new();
         int targetKill = (int)(population.Length * CodeParams.REPLACE_RATE);
+        int targetElite = (int)(population.Length * CodeParams.ELITE_RATE);
 
         int offspringIdx = targetKill;
-        for (int i = 0; i < targetKill; ++i)
+        for (int i = 0; i < targetElite; ++i)
+        {
+            Waypoint[] parentA = population[i];
+            Waypoint[] parentB = population[++i];
+
+            (Waypoint[] offspringA, Waypoint[] offspringB) = CrossOver(parentA, parentB, random);
+
+            population[offspringIdx++] = offspringA;
+            population[offspringIdx++] = offspringB;
+        }
+
+        while (true)
         {
             Waypoint[] parentA = population[random.Next(0, targetKill)];
             Waypoint[] parentB = population[random.Next(0, targetKill)];
 
-
             (Waypoint[] offspringA, Waypoint[] offspringB) = CrossOver(parentA, parentB, random);
-            population[offspringIdx] = offspringA;
-            if (offspringIdx + 1 < population.Length) population[++offspringIdx] = offspringB;
+
+            population[offspringIdx++] = offspringA;
+            if (offspringIdx >= population.Length) break;
+            population[offspringIdx++] = offspringB;
+            if (offspringIdx >= population.Length) break;
+
         }
     }
 
