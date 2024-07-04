@@ -5,12 +5,12 @@ public static class UavTurnerCalculator
     public static (double requiredRadiusMeters, double arcLengthMeters) CalculateTurningRadiusAndArcLength(Waypoint A, Waypoint B, Waypoint C)
     {
         // Convert latitude and longitude from degrees to radians
-        double latA = ToRadians(A.Lat);
-        double lonA = ToRadians(A.Long);
-        double latB = ToRadians(B.Lat);
-        double lonB = ToRadians(B.Long);
-        double latC = ToRadians(C.Lat);
-        double lonC = ToRadians(C.Long);
+        double latA = ExtraMath.ToRadians(A.Lat);
+        double lonA = ExtraMath.ToRadians(A.Long);
+        double latB = ExtraMath.ToRadians(B.Lat);
+        double lonB = ExtraMath.ToRadians(B.Long);
+        double latC = ExtraMath.ToRadians(C.Lat);
+        double lonC = ExtraMath.ToRadians(C.Long);
 
         // Calculate vectors in meters using Haversine formula approximation
         var AB = (x: (latB - latA) * EarthRadiusKm * 1000, y: (lonB - lonA) * EarthRadiusKm * Math.Cos(latA) * 1000);
@@ -35,10 +35,5 @@ public static class UavTurnerCalculator
         double arcLength = isStraightLine ? magBC : requiredRadius * theta;
 
         return (requiredRadius, arcLength);
-    }
-
-    private static double ToRadians(double degrees)
-    {
-        return degrees * (Math.PI / 180);
     }
 }

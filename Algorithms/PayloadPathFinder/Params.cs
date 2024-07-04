@@ -1,5 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
-
 public static class CodeParams
 {
     // code related
@@ -15,8 +13,8 @@ public static class CodeParams
 public static class MissionParams
 {
     static public Waypoint BeforeStart = new(29.8134564, 30.8248365);
-    static public Waypoint Start =       new(29.8127582, 30.8246756);
-    static public Waypoint Target =      new(29.8132144, 30.8249545);
+    static public Waypoint Start = new(29.8127582, 30.8246756);
+    static public Waypoint Target = new(29.8132144, 30.8249545);
 
     static public Waypoint[] Fence = [
         new Waypoint(29.8117901, 30.8230877),
@@ -29,4 +27,9 @@ public static class MissionParams
 public static class DesignParams
 {
     static public float MIN_TURN_RADIUS = 45; // meters
+
+    public static double H1 = 80; // aircraft altitude
+    public static double Vpa = 25; // aircraft velocity
+    public static double Vag = 0; //windspeed
+    public static double angle = 190;// wind bearing
 }

@@ -3,6 +3,7 @@
 TODO When calculating fitness function ensure that no arc exceeds the fence, otherwise give penality
 TODO Ensure the above rule for from the throw point, to the landing location
 !TODO Add a gene for the angle we shoudl approach the payload from, and use it as the new target to drop from
+TODO Apply elitism selection
 */
 
 class Program
