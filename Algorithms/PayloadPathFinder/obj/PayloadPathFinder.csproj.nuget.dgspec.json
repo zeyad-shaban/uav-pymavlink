@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\PayloadPathFinder.csproj": {}
+    "C:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\PayloadPathFinder.csproj": {}
   },
   "projects": {
-    "c:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\PayloadPathFinder.csproj": {
+    "C:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\PayloadPathFinder.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\PayloadPathFinder.csproj",
+        "projectUniqueName": "C:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\PayloadPathFinder.csproj",
         "projectName": "PayloadPathFinder",
-        "projectPath": "c:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\PayloadPathFinder.csproj",
+        "projectPath": "C:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\PayloadPathFinder.csproj",
         "packagesPath": "C:\\Users\\zeyad\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\obj\\",
+        "outputPath": "C:\\Users\\zeyad\\Desktop\\Workspace\\Roben\\uav-pymavlink\\Algorithms\\PayloadPathFinder\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\zeyad\\AppData\\Roaming\\NuGet\\NuGet.Config"

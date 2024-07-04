@@ -3,20 +3,20 @@ public class Waypoint
     public double Lat;
     public double Long;
     public double DropAngle;
-    public bool isDropTarget = false;
+    public bool IsDropTarget = false;
 
-    public Waypoint(double lat, double longitude, double DropAngle = 0)
+    public Waypoint(double lat, double longitude, double dropAngle = 0, bool isDropTarget = false)
     {
-        if (DropAngle != 0)
+        if (isDropTarget)
         {
             Waypoint wp = PayloadCalculator.CalculateDropPoint(new Waypoint(lat, longitude), DropAngle);
             lat = wp.Lat;
             longitude = wp.Long;
-            isDropTarget = true;
         }
 
         Lat = lat;
         Long = longitude;
-        this.DropAngle = DropAngle;
+        DropAngle = dropAngle;
+        IsDropTarget = isDropTarget;
     }
 }

@@ -1,9 +1,9 @@
 public static class CodeParams
 {
     // code related
-    static public int POPULATION_SIZE = 10000;
+    static public int POPULATION_SIZE = 9000;
     static public int CHROMOSOME_SIZE = 6;
-    public static int MAX_GENERATIONS = 200;
+    public static int MAX_GENERATIONS = 100;
 
     public static float REPLACE_RATE = 0.5f;
     public static float INDIVIDUAL_MUTATE_RATE = 0.1f;
@@ -13,24 +13,26 @@ public static class CodeParams
 
 public static class MissionParams
 {
-    static public Waypoint BeforeStart = new(29.8143128, 30.8267248);
-    static public Waypoint Start = new(29.8156067, 30.8264458);
-    static public Waypoint Target = new(29.8182457, 30.8289027);
+    static public Waypoint BeforeStart = new(29.8149644, 30.8251369);
+    static public Waypoint Start = new(29.8157371, 30.8247185);
+    static public Waypoint Target = new(29.8148993, 30.8269608);
 
     static public Waypoint[] Fence = [
-        new Waypoint(29.8117901, 30.8230877),
-        new Waypoint(29.8113247, 30.8267570),
-        new Waypoint(29.8200376, 30.8288169),
-        new Waypoint(29.8206147, 30.8252120),
+        new Waypoint(29.8119391, 30.8234954),
+        new Waypoint(29.8112502, 30.8272505),
+        new Waypoint(29.8197397, 30.8298469),
+        new Waypoint(29.8206147, 30.8251262),
     ];
 }
 
 public static class DesignParams
 {
-    static public float MIN_TURN_RADIUS = 45; // meters
 
     public static double H1 = 80; // aircraft altitude
     public static double Vpa = 25; // aircraft velocity
     public static double Vag = 0; //windspeed
     public static double angle = 190;// wind bearing
+
+    // static public float BANK_ANGLE = 
+    static public float MIN_TURN_RADIUS = 70; // meters 
 }

@@ -2,7 +2,7 @@ public static class UavTurnerCalculator
 {
     private const double EarthRadiusKm = 6371.0;
 
-    public static (double requiredRadiusMeters, double arcLengthMeters) CalculateTurningRadiusAndArcLength(Waypoint A, Waypoint B, Waypoint C)
+    public static (double requiredRadiusMeters, double arcLengthMeters, double theta) CalculateTurningRadiusAndArcLength(Waypoint A, Waypoint B, Waypoint C)
     {
         // Convert latitude and longitude from degrees to radians
         double latA = ExtraMath.ToRadians(A.Lat);
@@ -27,13 +27,15 @@ public static class UavTurnerCalculator
         double cosTheta = dotProduct / (magAB * magBC);
         double theta = Math.Acos(cosTheta);
 
-        bool isStraightLine = Math.Abs(theta) <= 1e-6; // feel free to change this conditon as you like
+        bool ontopOfEachOther = Double.IsNaN(theta);
+        bool isStraightLine = Math.Abs(theta) <= 1e-6;
 
-        double requiredRadius = magBC / (2 * Math.Sin(theta / 2));
+        if (ontopOfEachOther) theta = 0;
+        double requiredRadius = ontopOfEachOther ? 1/theta : magBC / (2 * Math.Sin(theta / 2));
 
         // Calculate the arc length
-        double arcLength = isStraightLine ? magBC : requiredRadius * theta;
+        double arcLength = isStraightLine || ontopOfEachOther ? magBC : requiredRadius * theta;
 
-        return (requiredRadius, arcLength);
+        return (requiredRadius, arcLength, Double.IsNaN(theta) ? 0 : theta);
     }
 }
