@@ -21,7 +21,6 @@ public static class Genetic
 
     public static float[] MeasureFitness(float[] fitness, Waypoint[][] population, Waypoint beforeStart, Waypoint start, Waypoint target)
     {
-        int exceedFenceTurn = 700; // TODO ACTIVATE THIS MF
         int invalidTurnPenality = 1500;
         int toTargetThetaPenalityMult = 10;
 
