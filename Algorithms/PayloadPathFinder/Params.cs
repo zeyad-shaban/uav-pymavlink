@@ -1,21 +1,21 @@
 public static class CodeParams
 {
     // code related
-    static public int POPULATION_SIZE = 9000;
-    static public int CHROMOSOME_SIZE = 6;
-    public static int MAX_GENERATIONS = 100;
+    static public int POPULATION_SIZE = 20000;
+    static public int CHROMOSOME_SIZE = 4;
+    public static int MAX_GENERATIONS = 500;
 
     public static float REPLACE_RATE = 0.5f;
-    public static float INDIVIDUAL_MUTATE_RATE = 0.1f;
-    public static float GENE_MUTATE_RATE = 1f;
+    public static float INDIVIDUAL_MUTATE_RATE = 0.15f;
+    public static float GENE_MUTATE_RATE = 0.25f;
     static public float ELITE_RATE = 0.05f;
 }
 
 public static class MissionParams
 {
-    static public Waypoint BeforeStart = new(29.8149644, 30.8251369);
-    static public Waypoint Start = new(29.8157371, 30.8247185);
-    static public Waypoint Target = new(29.8148993, 30.8269608);
+    static public Waypoint BeforeStart = new(29.8149644, 30.8262312);
+    static public Waypoint Start = new(29.8143780, 30.8270466);
+    static public Waypoint Target = new(29.8147503, 30.8246970);
 
     static public Waypoint[] Fence = [
         new Waypoint(29.8119391, 30.8234954),

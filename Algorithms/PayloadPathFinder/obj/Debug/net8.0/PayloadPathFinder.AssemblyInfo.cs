@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PayloadPathFinder")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+de7f6f162e751b697c65a504c94e6c173158b172")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+136f908b2f3862eb665b7d22fd65525b0c2afd60")]
 [assembly: System.Reflection.AssemblyProductAttribute("PayloadPathFinder")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PayloadPathFinder")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
