@@ -1,17 +1,21 @@
 from pymavlink import mavutil, mavwp
 from modules.utils import new_waypoint, readWaypoints, addHome, takeoffSequence, landingSequence, getBearing2Points, isPointInFence, getDistance2Points
-import numpy as np
 from modules.ObstacleAvoid import ObstacleAvoid
 from modules.UAV import UAV
 from modules.Fence import uploadFence
+from modules.PythonNetTypeBridge import asNetArray, asNumpyArray
 from math import comb
 
+import numpy as np
 import os
 import clr
 
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
-    altwp = 70
+    clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
+    from PathFinder import PayloadPathFinder
+    from System import ValueTuple, Array
+
     wpLoader = mavwp.MAVWPLoader()
 
     wpCords = ObstacleAvoid(uav, wpPath, obsPath)
@@ -34,20 +38,23 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
 
     # Upload adjusting Wps
 
-    clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
-    from PathFinder import PayloadPathFinder
-    adjustingWps = PayloadPathFinder.FindOptimalPath()
+    adjustingWps = asNumpyArray(PayloadPathFinder.FindOptimalPath(
+        asNetArray(np.array(beforeLastWp)),
+        asNetArray(np.array(lastWp)),
+        asNetArray(np.array(targetCord)),
+        asNetArray(np.array(fenceCords)),
+    ))
 
-    for i in range(len(adjustingWps) - 1):
+    for i in range(len(adjustingWps)):
         wp = adjustingWps[i]
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            wp[0], wp[1], altwp))
+            wp[0], wp[1], 80))
 
     wp = adjustingWps[len(adjustingWps) - 1]
     wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
         master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 5, 0, 0,
-        wp[0], wp[1], altwp))
+        wp[0], wp[1], uav.alt))
 
     wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
         master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,

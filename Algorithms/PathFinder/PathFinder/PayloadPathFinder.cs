@@ -8,12 +8,12 @@ namespace PathFinder
 {
     public static class PayloadPathFinder
     {
-        public static Waypoint[] FindOptimalPath((double lat, double longitude) beforeStart, (double lat, double longitude) start, (double lat, double longitude) target, (double lat, double longitude)[] fence)
+        public static double[] FindOptimalPath(double[] beforeStart, double[] start, double[] target, double[,] fence)
         {
-            MissionParams.BeforeStart = new Waypoint(beforeStart.lat, beforeStart.longitude);
-            MissionParams.Start = new Waypoint(start.lat, start.longitude);
-            MissionParams.Target = new Waypoint(target.lat, target.longitude);
-            MissionParams.Fence = Array.ConvertAll(fence, item => new Waypoint(item.lat, item.longitude));
+            MissionParams.BeforeStart = new Waypoint(beforeStart[0], beforeStart[1]);
+            MissionParams.Start = new Waypoint(start[0], start[1]);
+            MissionParams.Target = new Waypoint(target[0], target[1]);
+            MissionParams.Fence = Array.ConvertAll(Enumerable.Range(0, fence.GetLength(0)).ToArray(), i => new Waypoint(fence[i, 0], fence[i, 1]));
 
 
             Waypoint[][] population = Genetic.CreatePopulation(CodeParams.CHROMOSOME_SIZE, MissionParams.Target);
@@ -23,12 +23,12 @@ namespace PathFinder
             {
                 fitness = Genetic.MeasureFitness(fitness, population, MissionParams.BeforeStart, MissionParams.Start, MissionParams.Target);
                 Array.Sort(fitness, population);
-                // break;
                 Genetic.Reproduce(population);
             }
 
             Console.WriteLine($"Shortest path found, Fitness value of: {fitness[0]}");
-            return population[0];
+            return population[0].SelectMany(wp => new double[] { wp.Lat, wp.Long }).ToArray();
         }
+
     }
 }
