@@ -34,7 +34,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
 
     # Upload adjusting Wps
 
-    clr.AddReference(os.path.join(os.getcwd(), "./Algorithms/PathFinder/bin/Release/net8.0/PathFinder.dll"))
+    clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
     from PathFinder import PayloadPathFinder
     adjustingWps = PayloadPathFinder.FindOptimalPath()
 
