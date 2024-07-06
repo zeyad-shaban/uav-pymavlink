@@ -6,12 +6,19 @@ from modules.UAV import UAV
 from modules.Fence import uploadFence
 from math import comb
 
+import os
+import clr
+
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
     altwp = 70
     wpLoader = mavwp.MAVWPLoader()
+
     wpCords = ObstacleAvoid(uav, wpPath, obsPath)
-    payloadCords = readWaypoints(payloadPath)
+    targetCord = readWaypoints(payloadPath)[0]
+    lastWp = wpCords[len(wpCords) - 1]
+    beforeLastWp = wpCords[len(wpCords) - 2]
+
     fenceCords = readWaypoints(fencePath)
 
     uploadFence(master, fencePath)
@@ -19,29 +26,32 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
     home = addHome(master, wpLoader)
     takeoffSequence(master, wpLoader, home, uav)
 
+    # upload normal mission
     for i, cord in enumerate(wpCords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             cord[0], cord[1], cord[2]))
 
-    drop_x, _ = payload_drop_eq(uav.H1, uav.Vpa, uav.Vag, uav.angle)
-    for payloadCord in payloadCords:
-        adjustingWps = addWpAirDrop(payloadCord, drop_x, wpCords, fenceCords)
+    # Upload adjusting Wps
 
-        for i in range(len(adjustingWps) - 1):
-            wp = adjustingWps[i]
-            wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-                master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-                wp[0], wp[1], altwp))
+    clr.AddReference(os.path.join(os.getcwd(), "./Algorithms/PathFinder/bin/Release/net8.0/PathFinder.dll"))
+    from PathFinder import PayloadPathFinder
+    adjustingWps = PayloadPathFinder.FindOptimalPath()
 
-        wp = adjustingWps[len(adjustingWps) - 1]
+    for i in range(len(adjustingWps) - 1):
+        wp = adjustingWps[i]
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 5, 0, 0,
+            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             wp[0], wp[1], altwp))
 
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,
-            0, 0, 0))
+    wp = adjustingWps[len(adjustingWps) - 1]
+    wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 5, 0, 0,
+        wp[0], wp[1], altwp))
+
+    wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,
+        0, 0, 0))
 
     # landingSequence(master, wpLoader, home, uav)
 
