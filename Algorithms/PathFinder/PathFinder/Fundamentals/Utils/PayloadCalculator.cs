@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PathFinder.Utils
+namespace PathFinder.Fundamentals
 {
     internal static class PayloadCalculator
     {
@@ -63,8 +63,10 @@ namespace PathFinder.Utils
             return (x, y);
         }
 
-        public static Waypoint CalculateDropPoint(Waypoint target, double angle)
+        public static Waypoint CalculateDropPoint(double angle)
         {
+            Waypoint target = MissionParams.Target;
+
             var (distance, _) = PayloadDropEq(DesignParams.H1, DesignParams.Vpa, DesignParams.Vag, DesignParams.angle);
 
             // Calculate the new waypoint position

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathFinder", "PathFinder\PathFinder.csproj", "{F54716F2-DB0C-4EE3-9C72-9E46D76D48D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathFinder.UnitTests", "PathFinder.UnitTests\PathFinder.UnitTests.csproj", "{1A0E6EF5-7F69-4B0F-A968-E8BC45A33C13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{F54716F2-DB0C-4EE3-9C72-9E46D76D48D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F54716F2-DB0C-4EE3-9C72-9E46D76D48D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F54716F2-DB0C-4EE3-9C72-9E46D76D48D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0E6EF5-7F69-4B0F-A968-E8BC45A33C13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0E6EF5-7F69-4B0F-A968-E8BC45A33C13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0E6EF5-7F69-4B0F-A968-E8BC45A33C13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0E6EF5-7F69-4B0F-A968-E8BC45A33C13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

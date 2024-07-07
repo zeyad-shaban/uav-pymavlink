@@ -41,15 +41,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Genetic.cs" />
-    <Compile Include="Params.cs" />
-    <Compile Include="PayloadPathFinder.cs" />
+    <Compile Include="Fundamentals\Genetic.cs" />
+    <Compile Include="Fundamentals\Params.cs" />
+    <Compile Include="Fundamentals\PayloadPathFinder.cs" />
+    <Compile Include="Fundamentals\Utils\WaypointPrinter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\ExtraMath.cs" />
-    <Compile Include="Utils\PayloadCalculator.cs" />
-    <Compile Include="Utils\UavTurnerCalculator.cs" />
-    <Compile Include="Utils\WaypointGenerator.cs" />
-    <Compile Include="Waypoint.cs" />
+    <Compile Include="Fundamentals\Utils\ExtraMath.cs" />
+    <Compile Include="Fundamentals\Utils\PayloadCalculator.cs" />
+    <Compile Include="Fundamentals\Utils\UavTurnerCalculator.cs" />
+    <Compile Include="Fundamentals\Utils\WaypointGenerator.cs" />
+    <Compile Include="Fundamentals\Waypoint.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

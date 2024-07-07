@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PathFinder.Utils
+namespace PathFinder.Fundamentals
 {
     internal static class WaypointGenerator
     {

@@ -1,18 +1,17 @@
-﻿using PathFinder.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PathFinder
+namespace PathFinder.Fundamentals
 {
     public class Waypoint
     {
         private static Dictionary<int, Waypoint> savedDropCords = new Dictionary<int, Waypoint>();
         public double Lat;
         public double Long;
-        public double DropAngle;
+        public int DropAngle;
         public bool IsDropTarget = false;
 
         public Waypoint(double lat, double longitude, int dropAngle = 0, bool isDropTarget = false)
@@ -21,7 +20,7 @@ namespace PathFinder
             {
                 if (!savedDropCords.TryGetValue(dropAngle, out Waypoint wp))
                 {
-                    wp = PayloadCalculator.CalculateDropPoint(new Waypoint(lat, longitude), DropAngle);
+                    wp = PayloadCalculator.CalculateDropPoint(DropAngle);
                     savedDropCords[dropAngle] = wp;
                 };
 

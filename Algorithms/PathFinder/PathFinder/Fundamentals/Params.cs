@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PathFinder
+namespace PathFinder.Fundamentals
 {
     internal static class CodeParams
     {
@@ -14,7 +14,7 @@ namespace PathFinder
 
         public static float REPLACE_RATE = 0.5f;
         public static float INDIVIDUAL_MUTATE_RATE = 0.15f;
-        public static float GENE_MUTATE_RATE = 0.25f;
+        public static float GENE_MUTATE_RATE = 0.5f;
         static public float ELITE_RATE = 0.05f;
     }
 
@@ -37,7 +37,7 @@ namespace PathFinder
 
         public static double H1 = 80; // aircraft altitude
         public static double Vpa = 25; // aircraft velocity
-        public static double Vag = 0; //windspeed
+        public static double Vag = 0; // windspeed
         public static double angle = 190;// wind bearing
 
         // static public float BANK_ANGLE = 

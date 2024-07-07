@@ -14,7 +14,6 @@ import clr
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
     clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
     from PathFinder import PayloadPathFinder
-    from System import ValueTuple, Array
 
     wpLoader = mavwp.MAVWPLoader()
 
