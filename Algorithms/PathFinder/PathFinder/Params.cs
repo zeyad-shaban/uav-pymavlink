@@ -8,9 +8,9 @@ namespace PathFinder
 {
     internal static class CodeParams
     {
-        static public int POPULATION_SIZE = 20000;
+        static public int POPULATION_SIZE = 15000;
         static public int CHROMOSOME_SIZE = 4;
-        public static int MAX_GENERATIONS = 500;
+        public static int MAX_GENERATIONS = 200;
 
         public static float REPLACE_RATE = 0.5f;
         public static float INDIVIDUAL_MUTATE_RATE = 0.15f;

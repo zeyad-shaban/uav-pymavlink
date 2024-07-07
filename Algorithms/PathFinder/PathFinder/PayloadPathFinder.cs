@@ -8,7 +8,7 @@ namespace PathFinder
 {
     public static class PayloadPathFinder
     {
-        public static double[] FindOptimalPath(double[] beforeStart, double[] start, double[] target, double[,] fence)
+        public static double[,] FindOptimalPath(double[] beforeStart, double[] start, double[] target, double[,] fence)
         {
             MissionParams.BeforeStart = new Waypoint(beforeStart[0], beforeStart[1]);
             MissionParams.Start = new Waypoint(start[0], start[1]);
@@ -27,7 +27,20 @@ namespace PathFinder
             }
 
             Console.WriteLine($"Shortest path found, Fitness value of: {fitness[0]}");
-            return population[0].SelectMany(wp => new double[] { wp.Lat, wp.Long }).ToArray();
+            return ConvertChromosomeToDoubles(population[0]);
+        }
+        public static double[,] ConvertChromosomeToDoubles(Waypoint[] chromosome)
+        {
+            int chromosomeSize = chromosome.Length;
+            double[,] result = new double[chromosomeSize, 2];
+
+            for (int i = 0; i < chromosomeSize; i++)
+            {
+                result[i, 0] = chromosome[i].Lat;
+                result[i, 1] = chromosome[i].Long;
+            }
+
+            return result;
         }
 
     }

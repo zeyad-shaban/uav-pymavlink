@@ -1,28 +1,23 @@
 {
-  "bearing" : 10,
-  "altitude" : 80,
-
-  "takeOffAngle" : 15,
-  "takeOffAlt" : 45,
-  "obsAvoidSafeDistance" : 10,
-
-  "Files":
-  {
-    "fenceFile" : "Geofence",
-    "waypointsFile" : "Waypoints",
-    "obstaclesFile" : "Obstacles",
-    "payloadsFile" : "Payloads",
-    "searchGridFile" : "SearchGrid"
+  "bearing": 10,
+  "altitude": 80,
+  "takeOffAngle": 15,
+  "takeOffAlt": 45,
+  "obsAvoidSafeDistance": 10,
+  "Files": {
+    "fenceFile": "Geofence",
+    "waypointsFile": "Waypoints",
+    "obstaclesFile": "Obstacles",
+    "payloadsFile": "Payloads",
+    "searchGridFile": "SearchGrid"
   },
-
-  "airdropData" :
-  {
-    "aircraftAltitude" : 80,
-    "aircraftVelocity" : 25,
-    "windSpeed" : 0,
-    "windBearing" : 190,
-
-    "servoNo" : 12,
-    "PWMValue" : 2500
+  "airdropData": {
+    "aircraftAltitude": 80,
+    "aircraftVelocity": 25,
+    "windSpeed": 0,
+    "windBearing": 190,
+    "servoNo": 12,
+    "PAYLOAD_OPEN_PWM_VALUE": 2500,
+    "PAYLOAD_CLOSE_PWM_VALUE": 1000
   }
 }

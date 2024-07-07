@@ -1,3 +1,4 @@
 {
-    "dotnet.defaultSolution": "PathFinder.sln"
+    "dotnet.defaultSolution": "PathFinder.sln",
+    "dotnet.preferCSharpExtension": true
 }

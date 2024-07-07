@@ -1,5 +1,6 @@
 from pymavlink import mavutil
-from missions import mission1, mission2, mission3, mission1_bezier
+from missions import mission1, mission2, mission3
+from missions import mission1
 from modules.UAV import UAV
 from modules.Camera import Camera
 
@@ -8,7 +9,7 @@ if __name__ == "__main__":
     MISSION_NUMBER = 1
 
     uav = UAV("./data/Data.json")
-    connectionString = "udpin:172.29.208.1:14550"
+    connectionString = "udpin:172.19.192.1:14550"
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
 
@@ -22,7 +23,7 @@ if __name__ == "__main__":
     surveySquare = './data/SearchSquare.csv'
 
     if MISSION_NUMBER == 1:
-        mission1_bezier.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
+        mission1.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
     elif MISSION_NUMBER == 2:
         mission2.startMission(uav, master, sonya6000, surveyAlt=80, surveySpeed=10, surveySquarePath=surveySquare, fencePath=fencePath)
     elif MISSION_NUMBER == 3:

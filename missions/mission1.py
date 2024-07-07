@@ -1,132 +1,74 @@
 from pymavlink import mavutil, mavwp
-from modules.utils import new_waypoint, readWaypoints, addHome, takeoffSequence, landingSequence, getBearing2Points
-import numpy as np
+from modules.utils import new_waypoint, readWaypoints, addHome, takeoffSequence, landingSequence, getBearing2Points, isPointInFence, getDistance2Points
 from modules.ObstacleAvoid import ObstacleAvoid
-from modules.Waypoint import Waypoint
 from modules.UAV import UAV
 from modules.Fence import uploadFence
+from modules.PythonNetTypeBridge import asNetArray, asNumpyArray
+from math import comb
+
+import numpy as np
+import os
+import clr
 
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
+    clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
+    from PathFinder import PayloadPathFinder
+    from System import ValueTuple, Array
+
     wpLoader = mavwp.MAVWPLoader()
+
     wpCords = ObstacleAvoid(uav, wpPath, obsPath)
-    payloadCords = readWaypoints(payloadPath)
-    drop_x, drop_y = payload_drop_eq(uav.H1, uav.Vpa, uav.Vag, uav.angle)
+    targetCord = readWaypoints(payloadPath)[0]
+    lastWp = wpCords[len(wpCords) - 1]
+    beforeLastWp = wpCords[len(wpCords) - 2]
 
-    def addWpAirDrop(payloadCord, d_drop):
-        d_wp = 60
-        drop_alt = 60
-        altwp = 70
-
-        lastMissionWp = wpCords[len(wpCords) - 1]
-
-        brng = getBearing2Points(payloadCord[0], payloadCord[1], lastMissionWp[0], lastMissionWp[1])
-        Lat_drop, Long_drop = new_waypoint(payloadCord[0], payloadCord[1], d_drop, brng)
-        wpAfter_lat, wpAfter_long = new_waypoint(Lat_drop, Long_drop, d_wp, brng-180)
-        wpBefore2_lat, wpBefore2_long = new_waypoint(Lat_drop, Long_drop, d_wp, brng)
-        wpBefore1_lat, wpBefore1_long = new_waypoint(Lat_drop, Long_drop, d_wp*2, brng)
-
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            wpBefore1_lat, wpBefore1_long, altwp))
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            wpBefore2_lat, wpBefore2_long, altwp))
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, payloadRadius, 0, 0,
-            Lat_drop, Long_drop, drop_alt))
-
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PWM_value, 0, 0,
-            Lat_drop, Long_drop, drop_alt))
-
-        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            wpAfter_lat, wpAfter_long, altwp))
-
-        master.waypoint_clear_all_send()
-        master.waypoint_count_send(wpLoader.count())
-
-        for i in range(wpLoader.count()):
-            msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
-            master.mav.send(wpLoader.wp(msg.seq))
+    fenceCords = readWaypoints(fencePath)
 
     uploadFence(master, fencePath)
 
     home = addHome(master, wpLoader)
     takeoffSequence(master, wpLoader, home, uav)
 
+    # upload normal mission
     for i, cord in enumerate(wpCords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             cord[0], cord[1], cord[2]))
 
-    for payloadCord in payloadCords:
-        addWpAirDrop(payloadCord, drop_x)
+    # Upload adjusting Wps
+    print(f"PID: {os.getpid()}")
+
+    adjustingWps = asNumpyArray(PayloadPathFinder.FindOptimalPath(
+        asNetArray(np.array(beforeLastWp)),
+        asNetArray(np.array(lastWp)),
+        asNetArray(np.array(targetCord)),
+        asNetArray(np.array(fenceCords))
+    ))
+
+    for i in range(len(adjustingWps)):
+        wp = adjustingWps[i]
+        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+            wp[0], wp[1], uav.alt))
+
+    # Servo control
+    wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PAYLOAD_OPEN_PWM_VALUE, 0, 0,
+        0, 0, 0))
+
+    wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+        targetCord[0], targetCord[1], uav.alt))
+
+    wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_SET_SERVO, 0, 1, uav.Servo_No, uav.PAYLOAD_CLOSE_PWM_VALUE, 0, 0,
+        0, 0, 0))
+
     landingSequence(master, wpLoader, home, uav)
 
     master.waypoint_clear_all_send()
     master.waypoint_count_send(wpLoader.count())
-
     for _ in range(wpLoader.count()):
         msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
         master.mav.send(wpLoader.wp(msg.seq))
-
-
-def payload_drop_eq(H1, Vpa, Vag, angle):
-    g = 9.81  # acceleration due to gravity
-    Cd = 0.5  # drag coefficient of payloads
-    rho = 1.225  # density of air
-    A = 0.02  # average cross section of the payload
-    m = 1  # mass of the payload
-    H = [float(H1)]  # height of the plane in meters
-    ty = [0]  # duration of fall
-    Vy = [0]  # velocity in downward direction
-    acc = [9.81]  # acceleration in downward direction
-    Dy = [0]  # upward drag force
-    dy = [0]  # deceleration due to drag force
-    k = 1
-    int = 0.001  # time intervals for calculation in the loops
-
-    while H[k-1] > 0:
-        ty.append(ty[k-1] + int)
-        H.append(H[k-1] - (Vy[k-1] * int + 0.5 * acc[k-1] * int**2))
-        Vy.append(Vy[k-1] + acc[k-1] * int)
-        Dy.append(Cd * rho * (Vy[k-1]**2) * A / 2)
-        dy.append(Dy[k-1] / m)
-        acc.append(g - dy[k])
-        k = k + 1
-
-    print("££££££££££££££££££££££££££££££")
-    print("Duration of free-fall:", ty[k-1], "sec")
-    print("££££££££££££££££££££££££££££££")
-
-    Vpa = float(Vpa)  # cruising velocity in m/s
-    Vag = float(Vag)  # velocity of wind wrt to ground in m/s
-    angle = float(angle)  # angle of Vag in degrees
-
-    Vpg = Vpa - Vag * np.cos(np.deg2rad(angle))  # velocity of plane wrt ground
-    Vx = [Vpg]  # velocity of payload in horizontal direction
-    R = [0]  # distance covered by payload in horizontal direction
-    Dx = [Cd * 1.225 * (Vx[0]**2) * A / 2]  # horizontal drag on the payload
-    dx = [Dx[0] / m]  # horizontal deceleration on the payload
-    k = 1
-
-    Vx = np.append(Vx, np.zeros(len(ty)-1))
-    R = np.append(R, np.zeros(len(ty)-1))
-    Dx = np.append(Dx, np.zeros(len(ty)-1))
-    dx = np.append(dx, np.zeros(len(ty)-1))
-
-    for tx in range(len(ty)-1):
-        R[k] = R[k-1] + (Vx[k-1] * int - 0.5 * dx[k-1] * int**2)
-        Vx[k] = Vx[k-1] - dx[k-1] * int
-        Dx[k] = (Cd*1.225*0.5*A) * (Vx[k] ** 2)
-        dx[k] = Dx[k] / m
-        k = k + 1
-
-    print("££££££££££££££££££££££££££££££")
-    print("Range of payload", (R[k-1]), "meter")
-    print("££££££££££££££££££££££££££££££")
-    x = R[k-1]
-    y = H1
-    return x, y

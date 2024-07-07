@@ -16,12 +16,12 @@ namespace PathFinder
 
             for (int i = 0; i < population.Length; ++i)
             {
-                population[i] = new Waypoint[CodeParams.CHROMOSOME_SIZE + 1];
+                population[i] = new Waypoint[chromosomeSize + 1];
                 for (int geneIdx = 0; geneIdx < chromosomeSize; ++geneIdx)
                 {
                     population[i][geneIdx] = WaypointGenerator.GenerateRandomWaypoint();
                 }
-                population[i][population.Length - 1] = new Waypoint(target.Lat, target.Long, random.Next(0, 360), true);
+                population[i][chromosomeSize] = new Waypoint(target.Lat, target.Long, random.Next(0, 360), true);
             }
 
             return population;
