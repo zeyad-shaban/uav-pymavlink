@@ -48,7 +48,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
     for i in range(len(adjustingWps)):
         wp = adjustingWps[i]
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+            master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,    mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             wp[0], wp[1], uav.alt))
 
     # Servo control

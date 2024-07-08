@@ -8,14 +8,14 @@ namespace PathFinder.Fundamentals
 {
     internal static class CodeParams
     {
-        static public int POPULATION_SIZE = 20000;
+        // many defeats brave method >:}
+        static public int POPULATION_SIZE = 500000;
         static public int CHROMOSOME_SIZE = 3;
-        public static int MAX_GENERATIONS = 1000;
+        public static int MAX_GENERATIONS = 200;
 
-        public static float REPLACE_RATE = 0.7f;
-        public static float INDIVIDUAL_MUTATE_RATE = 0.3f;
-        public static float GENE_MUTATE_RATE = 0.8f;
-        public static float GENE_MUTATE_ENTIRELY = 0.5f;
+        public static float REPLACE_RATE = 0.5f;
+        public static float INDIVIDUAL_MUTATE_RATE = 0.25f;
+        public static float GENE_MUTATE_RATE = 0.75f;
         static public float ELITE_RATE = 0.005f;
     }
 

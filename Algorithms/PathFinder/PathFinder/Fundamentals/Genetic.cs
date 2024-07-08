@@ -112,7 +112,7 @@ namespace PathFinder.Fundamentals
                 offspringA[geneIdx] = random.Next(0, 2) == 0 ? parentA[geneIdx] : parentB[geneIdx];
                 if (shouldMutateA && random.NextDouble() < CodeParams.GENE_MUTATE_RATE)
                 {
-                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringA[geneIdx] = random.NextDouble() < CodeParams.GENE_MUTATE_ENTIRELY ? WaypointGenerator.GenerateRandomWaypoint() : ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1, (int)Math.Max(60, 200 * CodeParams.GENE_MUTATE_ENTIRELY)), random.Next(0, 360));
+                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringA[geneIdx] = ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1,75), random.Next(0, 360));
                     else offspringA[geneIdx] = new Waypoint(0, 0, random.Next(0, 360), true);
                 }
 
@@ -120,7 +120,7 @@ namespace PathFinder.Fundamentals
                 offspringB[geneIdx] = random.Next(0, 2) == 1 ? parentA[geneIdx] : parentB[geneIdx];
                 if (shouldMutateB && random.NextDouble() < CodeParams.GENE_MUTATE_RATE)
                 {
-                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringB[geneIdx] = random.NextDouble() < CodeParams.GENE_MUTATE_ENTIRELY ? WaypointGenerator.GenerateRandomWaypoint() : ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1, (int)Math.Max(60, 200 * CodeParams.GENE_MUTATE_ENTIRELY)), random.Next(0, 360));
+                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringB[geneIdx] = ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1,75), random.Next(0, 360));
                     else offspringB[geneIdx] = new Waypoint(0, 0, random.Next(0, 360), true);
                 }
             }
