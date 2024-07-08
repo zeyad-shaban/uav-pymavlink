@@ -52,7 +52,6 @@
     <Compile Include="PayloadPathFinderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExtraMathTester.cs" />
-    <Compile Include="WaypointPrinter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

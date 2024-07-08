@@ -28,8 +28,9 @@ namespace PathFinder.Fundamentals
 
         public static float[] MeasureFitness(float[] fitness, Waypoint[][] population, Waypoint beforeStart, Waypoint start, Waypoint target)
         {
-            int invalidTurnPenality = 1500;
-            int toTargetThetaPenalityMult = 100;
+            int invalidTurnPenality = 3000;
+            int toTargetThetaPenalityMult = 300;
+            int throwWpSpacingPenalityMult = 5;
 
             for (int indivIdx = 0; indivIdx < population.Length; ++indivIdx)
             {
@@ -51,6 +52,12 @@ namespace PathFinder.Fundamentals
 
                 (_, _, double thetaToTarget) = UavTurnerCalculator.CalculateTurningRadiusAndArcLength(individual[individual.Length - 2], individual[individual.Length - 1], target);
                 score += toTargetThetaPenalityMult * ExtraMath.ToDeg(thetaToTarget);
+
+                //double distance = ExtraMath.GetDistance2Wps(individual[individual.Length - 1], individual[individual.Length - 2]);
+                //if (distance < 70)
+                //{
+                //    score += (70 - distance) * throwWpSpacingPenalityMult; // penaltyFactor is a value you determine through experimentation
+                //}
 
                 fitness[indivIdx] = (float)score;
             }
@@ -105,20 +112,16 @@ namespace PathFinder.Fundamentals
                 offspringA[geneIdx] = random.Next(0, 2) == 0 ? parentA[geneIdx] : parentB[geneIdx];
                 if (shouldMutateA && random.NextDouble() < CodeParams.GENE_MUTATE_RATE)
                 {
-                    offspringA[geneIdx] = ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1, 50), random.Next(0, 360));
+                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringA[geneIdx] = random.NextDouble() < CodeParams.GENE_MUTATE_ENTIRELY ? WaypointGenerator.GenerateRandomWaypoint() : ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1, (int)Math.Max(60, 200 * CodeParams.GENE_MUTATE_ENTIRELY)), random.Next(0, 360));
+                    else offspringA[geneIdx] = new Waypoint(0, 0, random.Next(0, 360), true);
                 }
 
                 // B
                 offspringB[geneIdx] = random.Next(0, 2) == 1 ? parentA[geneIdx] : parentB[geneIdx];
                 if (shouldMutateB && random.NextDouble() < CodeParams.GENE_MUTATE_RATE)
                 {
-                    offspringB[geneIdx] = ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1, 50), random.Next(0, 360));
-                }
-
-                if (geneIdx == CodeParams.CHROMOSOME_SIZE)
-                {
-                    offspringA[geneIdx] = new Waypoint(0, 0, offspringA[geneIdx].DropAngle, true);
-                    offspringB[geneIdx] = new Waypoint(0, 0, offspringB[geneIdx].DropAngle, true);
+                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringB[geneIdx] = random.NextDouble() < CodeParams.GENE_MUTATE_ENTIRELY ? WaypointGenerator.GenerateRandomWaypoint() : ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1, (int)Math.Max(60, 200 * CodeParams.GENE_MUTATE_ENTIRELY)), random.Next(0, 360));
+                    else offspringB[geneIdx] = new Waypoint(0, 0, random.Next(0, 360), true);
                 }
             }
 

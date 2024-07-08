@@ -86,5 +86,23 @@ namespace PathFinder.Fundamentals
             }
             return inside;
         }
+
+        public static double GetDistance2Wps(Waypoint wp1, Waypoint wp2)
+        {
+            double lat1 = ToRadians(wp1.Lat);
+            double lon1 = ToRadians(wp1.Long);
+            double lat2 = ToRadians(wp2.Lat);
+            double lon2 = ToRadians(wp2.Long);
+
+            double dlon = lon2 - lon1;
+            double dlat = lat2 - lat1;
+
+            double a = Math.Sin(dlat / 2) * Math.Sin(dlat / 2) +
+                       Math.Cos(lat1) * Math.Cos(lat2) * Math.Sin(dlon / 2) * Math.Sin(dlon / 2);
+            double c = 2 * Math.Asin(Math.Sqrt(a));
+
+            double meters = R * c;
+            return meters;
+        }
     }
 }

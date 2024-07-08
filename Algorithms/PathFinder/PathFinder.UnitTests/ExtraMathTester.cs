@@ -58,5 +58,16 @@ namespace PathFinder.UnitTests
 
             Assert.IsTrue(insideFence);
         }
+
+        [TestMethod]
+        public void DistanceWaypoint_Wp1And2_DistInMeters()
+        {
+            Waypoint wp1 = new Waypoint(29.8162165, 30.8304209);
+            Waypoint wp2 = new Waypoint(29.8172962, 30.8309519);
+
+            double distance = ExtraMath.GetDistance2Wps(wp1, wp2);
+
+            Assert.IsTrue(distance == 130.52988379939222);
+        }
     }
 }

@@ -16,6 +16,8 @@ namespace PathFinder.Fundamentals
 
         public Waypoint(double lat, double longitude, int dropAngle = 0, bool isDropTarget = false)
         {
+            DropAngle = dropAngle;
+
             if (isDropTarget)
             {
                 if (!savedDropCords.TryGetValue(dropAngle, out Waypoint wp))
@@ -30,7 +32,6 @@ namespace PathFinder.Fundamentals
 
             Lat = lat;
             Long = longitude;
-            DropAngle = dropAngle;
             IsDropTarget = isDropTarget;
         }
     }

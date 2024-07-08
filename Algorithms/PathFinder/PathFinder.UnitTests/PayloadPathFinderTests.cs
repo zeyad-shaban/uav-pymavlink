@@ -7,9 +7,9 @@ namespace PathFinder.UnitTests
     [TestClass]
     public class PayloadPathFinderTests
     {
-        private double[] beforeStart = new double[] { 29.8173940, 30.8258986 };
-        private double[] start = new double[] { 29.8169751, 30.8249652 };
-        private double[] target = new double[] { 29.8174591, 30.8254158 };
+        private double[] beforeStart = new double[] { 29.8181852, 30.8252120 };
+        private double[] start = new double[] { 29.8190695, 30.8253515 };
+        private double[] target = new double[] { 29.8190602, 30.8293211 };
 
         [TestMethod]
         public void FindOptimalPath_AnyWp_ReturnsShortestPath()
