@@ -14,6 +14,7 @@ namespace PathFinder.Fundamentals
         {
             return degrees * (Math.PI / 180);
         }
+
         public static double ToDeg(double radians)
         {
             return radians * (180.0 / Math.PI);
@@ -21,29 +22,53 @@ namespace PathFinder.Fundamentals
 
         public static Waypoint WaypointMover(Waypoint wp, double d, double brng)
         {
-            const double stepSize = 1; // Step size in meters
-            double newLat, newLong;
-
-            (newLat, newLong) = CalculateNewWaypoint(wp.Lat, wp.Long, d, brng);
-
-            while (!IsInsideFence(newLat, newLong))
+            Waypoint newWp = CalculateWaypoint(wp.Lat, wp.Long, d, brng);
+            if (!IsInsideFence(newWp.Lat, newWp.Long))
             {
-                (newLat, newLong) = CalculateNewWaypoint(newLat, newLong, stepSize, brng + 180);
+                return FindPointWithinFence(wp.Lat, wp.Long, d, brng);
             }
-
-            return new Waypoint(newLat, newLong);
+            return newWp;
         }
 
-        private static (double, double) CalculateNewWaypoint(double lat1, double long1, double d, double brng)
+        private static Waypoint CalculateWaypoint(double lat, double lon, double distance, double bearing)
         {
-            brng = ToRadians(brng);
-            lat1 = ToRadians(lat1);
-            long1 = ToRadians(long1);
+            double bearingRad = ToRadians(bearing);
+            double latRad = ToRadians(lat);
+            double lonRad = ToRadians(lon);
 
-            double lat2_r = Math.Asin(Math.Sin(lat1) * Math.Cos(d / R) + Math.Cos(lat1) * Math.Sin(d / R) * Math.Cos(brng));
-            double long2_r = long1 + Math.Atan2(Math.Sin(brng) * Math.Sin(d / R) * Math.Cos(lat1), Math.Cos(d / R) - Math.Sin(lat1) * Math.Sin(lat2_r));
+            double newLatRad = Math.Asin(Math.Sin(latRad) * Math.Cos(distance / R) +
+                                         Math.Cos(latRad) * Math.Sin(distance / R) * Math.Cos(bearingRad));
+            double newLonRad = lonRad + Math.Atan2(Math.Sin(bearingRad) * Math.Sin(distance / R) * Math.Cos(latRad),
+                                                   Math.Cos(distance / R) - Math.Sin(latRad) * Math.Sin(newLatRad));
 
-            return (ToDeg(lat2_r), ToDeg(long2_r));
+            double newLat = ToDeg(newLatRad);
+            double newLon = ToDeg(newLonRad);
+
+            return new Waypoint(newLat, newLon);
+        }
+
+        public static Waypoint FindPointWithinFence(double lat, double lon, double distance, double bearing)
+        {
+            double low = 0;
+            double high = distance;
+            Waypoint midWaypoint = null;
+
+            while (high - low > 0.01) // Precision threshold
+            {
+                double mid = (low + high) / 2;
+                midWaypoint = CalculateWaypoint(lat, lon, mid, bearing);
+
+                if (IsInsideFence(midWaypoint.Lat, midWaypoint.Long))
+                {
+                    low = mid;
+                }
+                else
+                {
+                    high = mid;
+                }
+            }
+
+            return midWaypoint;
         }
 
         public static bool IsInsideFence(double lat, double lon)

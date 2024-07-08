@@ -18,14 +18,45 @@ namespace PathFinder.UnitTests
         }
 
         [TestMethod]
-        public void WaypointMover_ExceedFence_ReturnsInFenceTrue()
+        public void IsInsideFence_Inside_ReturnsTrue()
+        {
+            Waypoint wp = new Waypoint(29.8189485, 30.8272719);
+
+            bool insideFence = ExtraMath.IsInsideFence(wp.Lat, wp.Long);
+
+            Assert.IsTrue(insideFence);
+        }
+
+        [TestMethod]
+        public void IsInsideFence_Outside_ReturnsFalse()
+        {
+            Waypoint wp = new Waypoint(29.821668643211844, 30.8271861);
+
+            bool insideFence = ExtraMath.IsInsideFence(wp.Lat, wp.Long);
+
+            Assert.IsFalse(insideFence);
+        }
+
+        [TestMethod]
+        public void WaypointMover_ExceedFenceWest_ReturnsInFenceTrue()
         {
             Waypoint wp = new Waypoint(29.8183202, 30.8253890);
 
             Waypoint movedWp = ExtraMath.WaypointMover(wp, 100, 270);
             bool insideFence = ExtraMath.IsInsideFence(wp.Lat, wp.Long);
 
-            Assert.IsTrue(insideFence && movedWp.Lat == 29.818320195941169 && movedWp.Long == 30.824704873892152);
+            Assert.IsTrue(insideFence);
+        }
+
+        [TestMethod]
+        public void WaypointMover_ExceedFenceNorth_ReturnsInFenceTrue()
+        {
+            Waypoint wp = new Waypoint(29.8198700, 30.8271861);
+
+            Waypoint movedWp = ExtraMath.WaypointMover(wp, 200, 0);
+            bool insideFence = ExtraMath.IsInsideFence(movedWp.Lat, movedWp.Long);
+
+            Assert.IsTrue(insideFence);
         }
     }
 }
