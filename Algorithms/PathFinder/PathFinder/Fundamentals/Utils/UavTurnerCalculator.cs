@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PathFinder.Fundamentals
 {
-    internal static class UavTurnerCalculator
+    public static class UavTurnerCalculator
     {
         private const double EarthRadiusKm = 6371.0;
 

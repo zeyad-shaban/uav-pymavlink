@@ -9,7 +9,7 @@ if __name__ == "__main__":
     MISSION_NUMBER = 1
 
     uav = UAV("./data/Data.json")
-    connectionString = "udpin:192.168.112.1:14550"
+    connectionString = "udpin:172.24.128.1:14550"
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
 

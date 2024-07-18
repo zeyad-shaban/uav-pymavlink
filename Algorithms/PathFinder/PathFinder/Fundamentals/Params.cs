@@ -9,11 +9,11 @@ namespace PathFinder.Fundamentals
     internal static class CodeParams
     {
         // many defeats brave method >:}
-        static public int POPULATION_SIZE = 500000;
+        static public int POPULATION_SIZE = 250000;
         static public int CHROMOSOME_SIZE = 3;
         public static int MAX_GENERATIONS = 200;
 
-        public static float REPLACE_RATE = 0.5f;
+        public static float REPLACE_RATE = 0.4f;
         public static float INDIVIDUAL_MUTATE_RATE = 0.25f;
         public static float GENE_MUTATE_RATE = 0.75f;
         static public float ELITE_RATE = 0.005f;
@@ -21,6 +21,7 @@ namespace PathFinder.Fundamentals
 
     internal static class MissionParams
     {
+        static public int obstacleRadius = 5; // meters
         static public Waypoint BeforeStart;
         static public Waypoint Start;
         static public Waypoint Target;
@@ -31,6 +32,8 @@ namespace PathFinder.Fundamentals
             new Waypoint(29.8197397, 30.8298469),
             new Waypoint(29.8206147, 30.8251262),
         };
+
+        static public Waypoint[] Obstacles =    { };
     }
 
     internal static class DesignParams

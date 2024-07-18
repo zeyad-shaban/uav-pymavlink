@@ -9,8 +9,10 @@ namespace PathFinder.Fundamentals
 {
     public static class PayloadPathFinder
     {
-        public static double[,] FindOptimalPath(double[] beforeStart, double[] start, double[] target, double[,] fence = null)
+        public static double[,] FindOptimalPath(double[,] obs, double[] beforeStart, double[] start, double[] target, double[,] fence = null, int MAX_EXECUTE_TIME = 60)
         {
+            if (obs != null) MissionParams.Obstacles = Array.ConvertAll(Enumerable.Range(0, obs.GetLength(0)).ToArray(), i => new Waypoint(obs[i, 0], obs[i, 1]));
+
             MissionParams.BeforeStart = new Waypoint(beforeStart[0], beforeStart[1]);
             MissionParams.Start = new Waypoint(start[0], start[1]);
             MissionParams.Target = new Waypoint(target[0], target[1]);
@@ -23,13 +25,13 @@ namespace PathFinder.Fundamentals
             Waypoint[][] population = Genetic.CreatePopulation(CodeParams.CHROMOSOME_SIZE, MissionParams.Target);
             float[] fitness = new float[population.Length];
 
-            for (int generationsCount = 0; generationsCount < CodeParams.MAX_GENERATIONS && stopwatch.Elapsed.TotalSeconds < 40; ++generationsCount)
+            for (int generationsCount = 0; generationsCount < CodeParams.MAX_GENERATIONS && stopwatch.Elapsed.TotalSeconds < MAX_EXECUTE_TIME; ++generationsCount)
             {
                 fitness = Genetic.MeasureFitness(fitness, population, MissionParams.BeforeStart, MissionParams.Start, MissionParams.Target);
                 Array.Sort(fitness, population);
                 Genetic.Reproduce(population);
 
-                Console.WriteLine($"Generation: {generationsCount}/{CodeParams.MAX_GENERATIONS}, Best: {fitness[0]}, Time: {stopwatch.Elapsed.TotalSeconds}/40 seconds");
+                Console.WriteLine($"Generation: {generationsCount}/{CodeParams.MAX_GENERATIONS}, Best: {fitness[0]}, Time: {stopwatch.Elapsed.TotalSeconds}/{MAX_EXECUTE_TIME} seconds");
             }
 
             System.Diagnostics.Debug.WriteLine($"Shortest path found, Fitness value of: {fitness[0]}");
@@ -49,6 +51,5 @@ namespace PathFinder.Fundamentals
 
             return result;
         }
-
     }
 }

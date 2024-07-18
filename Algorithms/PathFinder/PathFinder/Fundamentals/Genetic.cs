@@ -31,6 +31,7 @@ namespace PathFinder.Fundamentals
             int invalidTurnPenality = 3000;
             int toTargetThetaPenalityMult = 300;
             int throwWpSpacingPenalityMult = 5;
+            int hitObstaclePenality = 500;
 
             for (int indivIdx = 0; indivIdx < population.Length; ++indivIdx)
             {
@@ -46,18 +47,16 @@ namespace PathFinder.Fundamentals
                     Waypoint beforeBefore = wpIdx == 0 ? beforeStart : (wpIdx == 1 ? start : individual[wpIdx - 2]);
 
                     (requiredRadius, arcLength, _) = UavTurnerCalculator.CalculateTurningRadiusAndArcLength(beforeBefore, before, currWaypoint);
+                    bool isValidToObs = ObstacleCalc.IsPathValidWithObstacles(MissionParams.Obstacles, beforeBefore, before, currWaypoint);
+
+                    if (!isValidToObs) score += hitObstaclePenality;
                     if (requiredRadius < DesignParams.MIN_TURN_RADIUS) score += invalidTurnPenality;
+
                     score += arcLength;
                 }
 
                 (_, _, double thetaToTarget) = UavTurnerCalculator.CalculateTurningRadiusAndArcLength(individual[individual.Length - 2], individual[individual.Length - 1], target);
                 score += toTargetThetaPenalityMult * ExtraMath.ToDeg(thetaToTarget);
-
-                //double distance = ExtraMath.GetDistance2Wps(individual[individual.Length - 1], individual[individual.Length - 2]);
-                //if (distance < 70)
-                //{
-                //    score += (70 - distance) * throwWpSpacingPenalityMult; // penaltyFactor is a value you determine through experimentation
-                //}
 
                 fitness[indivIdx] = (float)score;
             }
@@ -112,7 +111,7 @@ namespace PathFinder.Fundamentals
                 offspringA[geneIdx] = random.Next(0, 2) == 0 ? parentA[geneIdx] : parentB[geneIdx];
                 if (shouldMutateA && random.NextDouble() < CodeParams.GENE_MUTATE_RATE)
                 {
-                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringA[geneIdx] = ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1,75), random.Next(0, 360));
+                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringA[geneIdx] = ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1, 75), random.Next(0, 360));
                     else offspringA[geneIdx] = new Waypoint(0, 0, random.Next(0, 360), true);
                 }
 
@@ -120,7 +119,7 @@ namespace PathFinder.Fundamentals
                 offspringB[geneIdx] = random.Next(0, 2) == 1 ? parentA[geneIdx] : parentB[geneIdx];
                 if (shouldMutateB && random.NextDouble() < CodeParams.GENE_MUTATE_RATE)
                 {
-                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringB[geneIdx] = ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1,75), random.Next(0, 360));
+                    if (geneIdx != CodeParams.CHROMOSOME_SIZE) offspringB[geneIdx] = ExtraMath.WaypointMover(offspringA[geneIdx], random.Next(1, 75), random.Next(0, 360));
                     else offspringB[geneIdx] = new Waypoint(0, 0, random.Next(0, 360), true);
                 }
             }
