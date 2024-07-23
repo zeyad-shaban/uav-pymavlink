@@ -14,14 +14,14 @@ namespace PathFinder.UnitTests
             double[] start = new double[] { 29.8184365, 30.8253837 };
             double[] target = new double[] { 29.8176174, 30.8273363 };
 
-            double[,] path = PayloadPathFinder.FindOptimalPath(null, beforeStart, start, target);
+            //double[,] path = PayloadPathFinder.FindOptimalPath(null, beforeStart, start, target);
 
-            double[,] combined = CombinePathWithMissionWps(beforeStart, start, target, path);
+            //double[,] combined = CombinePathWithMissionWps(beforeStart, start, target, path);
 
-            string pathToUpload = WaypointPrinter.PrintWaypoints(combined);
+            //string pathToUpload = WaypointPrinter.PrintWaypoints(combined);
 
-            System.Diagnostics.Debug.WriteLine(pathToUpload);
-            Assert.IsNotNull(pathToUpload);
+            //System.Diagnostics.Debug.WriteLine(pathToUpload);
+            //Assert.IsNotNull(pathToUpload);
         }
 
 

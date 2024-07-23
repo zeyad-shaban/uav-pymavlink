@@ -1,7 +1,8 @@
 {
+  "home": [0, 0],
   "bearing": 10,
   "altitude": 80,
-  "takeOffAngle": 15,
+  "takeOffAngle": 8.5,
   "takeOffAlt": 45,
   "obsAvoidSafeDistance": 10,
   "Files": {

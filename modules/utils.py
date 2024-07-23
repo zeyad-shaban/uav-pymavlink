@@ -106,7 +106,10 @@ def isPointInFence(lat, lon, fence, extendDistance=0):
     return distance
 
 
-def addHome(master, wpLoader):
+def addHome(master, wpLoader, uav):
+    if uav.home[0] != 0:
+        return uav.home
+
     msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
     home = [msg.lat / 1e7, msg.lon / 1e7]
 
@@ -120,8 +123,8 @@ def addHome(master, wpLoader):
 def takeoffSequence(master, wpLoader, home, uav):
     lat, long = new_waypoint(home[0], home[1], 1, uav.main_bearing)
     wpLoader.insert(1, mavutil.mavlink.MAVLink_mission_item_message(
-        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 1, 0, 0, 0, 0,
-        lat, long, 1
+        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, uav.takeoff_angle, 0, 0, 0,
+        lat, long, uav.takeoff_alt
     ))
 
 

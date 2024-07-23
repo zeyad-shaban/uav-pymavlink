@@ -12,7 +12,7 @@ import clr
 
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
-    MAX_EXECUTE_TIME = 60  # second
+    MAX_EXECUTE_TIME = 100  # second
 
     clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
     from PathFinder.Fundamentals import PayloadPathFinder
@@ -30,7 +30,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
 
     uploadFence(master, fencePath)
 
-    home = addHome(master, wpLoader)
+    home = addHome(master, wpLoader, uav)
     takeoffSequence(master, wpLoader, home, uav)
 
     # upload normal mission
@@ -48,7 +48,11 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
         asNetArray(np.array(lastWp)),
         asNetArray(np.array(targetCord)),
         asNetArray(np.array(fenceCords)),
-        MAX_EXECUTE_TIME
+        MAX_EXECUTE_TIME,
+        uav.H1,
+        uav.Vpa,
+        uav.Vag,
+        uav.angle
     ))
 
     for i in range(len(adjustingWps)):

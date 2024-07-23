@@ -19,15 +19,10 @@ def startMission(uav: UAV, master, camera: Camera, surveyAlt: float, surveySpeed
 
     uploadFence(master, fencePath)
 
-    home = addHome(master, wpLoader)
+    home = addHome(master, wpLoader, uav)
     takeoffSequence(master, wpLoader, home, uav)
 
-    try:
-        recCords = readWaypoints(surveySquarePath)
-    except FileNotFoundError:
-        print('!!!!USING DEFAULT SEARCH SQUARE!!!!!!!!!')
-        recCords = readWaypoints('./data/defaults/SearchSquare.csv')
-
+    recCords = readWaypoints(surveySquarePath)
     searchRec = RectPoints(*recCords)
 
     cords = generateSurveyFromRect(searchRec, camera.spacing, home)
@@ -58,17 +53,17 @@ def startMission(uav: UAV, master, camera: Camera, surveyAlt: float, surveySpeed
         msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
         master.mav.send(wpLoader.wp(msg.seq))
 
-    didOpenCam = False
-    didCloseCam = False
-    while True:
-        msg = master.recv_match(type='MISSION_ITEM_REACHED', blocking=True)
-        if msg.seq >= 2 and not didOpenCam:
-            openCam()
-            didOpenCam = True
-        elif msg.seq > len(cords) + 1 and not didCloseCam:
-            closeCam()
-            didCloseCam = True
-            break
+    # didOpenCam = False
+    # didCloseCam = False
+    # while True:
+    #     msg = master.recv_match(type='MISSION_ITEM_REACHED', blocking=True)
+    #     if msg.seq >= 2 and not didOpenCam:
+    #         openCam()
+    #         didOpenCam = True
+    #     elif msg.seq > len(cords) + 1 and not didCloseCam:
+    #         closeCam()
+    #         didCloseCam = True
+    #         break
 
 
 def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List[float]]:

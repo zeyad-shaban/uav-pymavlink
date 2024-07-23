@@ -20,6 +20,14 @@ namespace PathFinder.UnitTests
         [TestMethod]
         public void IsInsideFence_Inside_ReturnsTrue()
         {
+            MissionParams.Fence = new Waypoint[]
+{
+                new Waypoint(29.8196652,  30.8248472),
+                new Waypoint(29.8184924,  30.8315635),
+                new Waypoint(29.8105055,  30.8300400),
+                new Waypoint(29.8117343,  30.8227229),
+            };
+
             Waypoint wp = new Waypoint(29.8189485, 30.8272719);
 
             bool insideFence = ExtraMath.IsInsideFence(wp.Lat, wp.Long);
@@ -51,6 +59,12 @@ namespace PathFinder.UnitTests
         [TestMethod]
         public void WaypointMover_ExceedFenceNorth_ReturnsInFenceTrue()
         {
+            MissionParams.Fence = new Waypoint[] {
+                new Waypoint(29.8280982,  30.8213282),
+                new Waypoint(29.8255293,  30.8457899),
+                new Waypoint(29.8097793,  30.8419704),
+                new Waypoint(29.8154392,  30.8164358),
+            };
             Waypoint wp = new Waypoint(29.8198700, 30.8271861);
 
             Waypoint movedWp = ExtraMath.WaypointMover(wp, 200, 0);

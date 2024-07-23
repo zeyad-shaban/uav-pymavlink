@@ -6,6 +6,7 @@ class UAV:
         with open(path, 'r') as f:
             data = json.load(f)
 
+        self.home = data["home"]
         self.main_bearing = data["bearing"]
         self.alt = data["altitude"]
         self.Pa = data["takeOffAngle"]

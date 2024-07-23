@@ -9,7 +9,7 @@ if __name__ == "__main__":
     MISSION_NUMBER = 1
 
     uav = UAV("./data/Data.json")
-    connectionString = "udpin:172.24.128.1:14550"
+    connectionString = "udpin:192.168.64.1:14550"
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
 
@@ -28,3 +28,8 @@ if __name__ == "__main__":
         mission2.startMission(uav, master, sonya6000, surveyAlt=80, surveySpeed=10, surveySquarePath=surveySquare, fencePath=fencePath)
     elif MISSION_NUMBER == 3:
         mission3.startMission(uav, master, wpPath=wpPath, obsPath=obsPath, fencePath=fencePath)
+
+
+# steps for running during flight test:
+#   1. set fence_total parameter to needed
+#   2. Set the home lat, long in uav.py (or let the gps decide it, but this can get somewhat risky if the gps messed up the bytes)

@@ -9,7 +9,7 @@ def startMission(uav, master, wpPath, obsPath, fencePath):
     wpLoader = mavwp.MAVWPLoader()
     uploadFence(master, fencePath)
 
-    home = addHome(master, wpLoader)
+    home = addHome(master, wpLoader, uav)
     takeoffSequence(master, wpLoader, home, uav)
     wpCords = ObstacleAvoid(uav, wpPath, obsPath)
     for i, cord in enumerate(wpCords):

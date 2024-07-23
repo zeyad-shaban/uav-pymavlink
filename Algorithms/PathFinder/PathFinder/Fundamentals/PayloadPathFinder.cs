@@ -9,15 +9,20 @@ namespace PathFinder.Fundamentals
 {
     public static class PayloadPathFinder
     {
-        public static double[,] FindOptimalPath(double[,] obs, double[] beforeStart, double[] start, double[] target, double[,] fence = null, int MAX_EXECUTE_TIME = 60)
+        public static double[,] FindOptimalPath(double[,] obs, double[] beforeStart, double[] start, double[] target, double[,] fence, int MAX_EXECUTE_TIME, float H1, float Vpa, float Vag, float angle)
         {
+            DesignParams.H1 = H1;
+            DesignParams.Vpa = Vpa;
+            DesignParams.Vag = Vag;
+            DesignParams.angle = angle;
+
             if (obs != null) MissionParams.Obstacles = Array.ConvertAll(Enumerable.Range(0, obs.GetLength(0)).ToArray(), i => new Waypoint(obs[i, 0], obs[i, 1]));
 
             MissionParams.BeforeStart = new Waypoint(beforeStart[0], beforeStart[1]);
             MissionParams.Start = new Waypoint(start[0], start[1]);
             MissionParams.Target = new Waypoint(target[0], target[1]);
-            if (fence != null) MissionParams.Fence = Array.ConvertAll(Enumerable.Range(0, fence.GetLength(0)).ToArray(), i => new Waypoint(fence[i, 0], fence[i, 1]));
 
+            if (fence != null) MissionParams.Fence = Array.ConvertAll(Enumerable.Range(0, fence.GetLength(0)).ToArray(), i => new Waypoint(fence[i, 0], fence[i, 1]));
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();

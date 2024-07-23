@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PathFinder.Fundamentals
 {
-    internal static class WaypointGenerator
+    public static class WaypointGenerator
     {
         private static Random random = new Random();
 
@@ -36,7 +36,7 @@ namespace PathFinder.Fundamentals
             return randomWaypoint;
         }
 
-        private static bool IsPointInPolygon(Waypoint point, Waypoint[] polygon)
+        public static bool IsPointInPolygon(Waypoint point, Waypoint[] polygon)
         {
             int n = polygon.Length;
             bool inside = false;
