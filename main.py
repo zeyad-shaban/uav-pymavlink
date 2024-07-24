@@ -6,7 +6,7 @@ from modules.Camera import Camera
 
 
 if __name__ == "__main__":
-    MISSION_NUMBER = 1
+    MISSION_NUMBER = 2
 
     uav = UAV("./data/Data.json")
     connectionString = "udpin:192.168.64.1:14550"

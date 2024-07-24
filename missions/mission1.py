@@ -12,7 +12,7 @@ import clr
 
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
-    MAX_EXECUTE_TIME = 100  # second
+    MAX_EXECUTE_TIME = 10  # second
 
     clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
     from PathFinder.Fundamentals import PayloadPathFinder
@@ -43,16 +43,16 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
     print(f"PID: {os.getpid()}")
 
     adjustingWps = asNumpyArray(PayloadPathFinder.FindOptimalPath(
-        asNetArray(np.array(obsCords)),
+        asNetArray(np.array(obsCords) if len(obsCords) > 0 else np.empty((0, 2))),
         asNetArray(np.array(beforeLastWp)),
         asNetArray(np.array(lastWp)),
         asNetArray(np.array(targetCord)),
         asNetArray(np.array(fenceCords)),
         MAX_EXECUTE_TIME,
-        uav.H1,
-        uav.Vpa,
-        uav.Vag,
-        uav.angle
+        float(uav.H1),
+        float(uav.Vpa),
+        float(uav.Vag),
+        float(uav.angle)
     ))
 
     for i in range(len(adjustingWps)):
