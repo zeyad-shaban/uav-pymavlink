@@ -19,6 +19,7 @@
     "windBearing": 190,
     "servoNo": 12,
     "PAYLOAD_OPEN_PWM_VALUE": 2500,
-    "PAYLOAD_CLOSE_PWM_VALUE": 1000
+    "PAYLOAD_CLOSE_PWM_VALUE": 1000,
+    "PAYLOAD_ACCEPTANCE_RADIUS": 0
   }
 }

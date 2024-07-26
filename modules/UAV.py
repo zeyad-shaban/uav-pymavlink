@@ -30,6 +30,7 @@ class UAV:
         self.Servo_No = data["airdropData"]["servoNo"]
         self.PAYLOAD_OPEN_PWM_VALUE = data["airdropData"]["PAYLOAD_OPEN_PWM_VALUE"]
         self.PAYLOAD_CLOSE_PWM_VALUE = data["airdropData"]["PAYLOAD_CLOSE_PWM_VALUE"]
+        self.PAYLOAD_ACCEPTANCE_RADIUS = data["airdropData"]["PAYLOAD_ACCEPTANCE_RADIUS"]
         # self.API = connect(data["connection-string"], wait_ready=True)
         return
 

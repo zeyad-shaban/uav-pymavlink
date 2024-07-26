@@ -12,7 +12,7 @@ import clr
 
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
-    MAX_EXECUTE_TIME = 20  # second
+    MAX_EXECUTE_TIME = 5  # second
 
     clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
     from PathFinder.Fundamentals import PayloadPathFinder
@@ -55,11 +55,16 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
         float(uav.angle)
     ))
 
-    for i in range(len(adjustingWps)):
+    for i in range(len(adjustingWps) - 1):
         wp = adjustingWps[i]
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,    mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             wp[0], wp[1], uav.alt))
+
+    lastAdjustingWp = adjustingWps[-1]
+    wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,    mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, uav.PAYLOAD_ACCEPTANCE_RADIUS, 0, 0,
+        lastAdjustingWp[0], lastAdjustingWp[1], uav.alt))
 
     # Servo control
     wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
