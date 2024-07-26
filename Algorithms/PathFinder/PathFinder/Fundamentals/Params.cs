@@ -40,6 +40,6 @@ namespace PathFinder.Fundamentals
         public static double angle = 190;// wind bearing
 
         // static public float BANK_ANGLE = 
-        static public float MIN_TURN_RADIUS = 45; // meters 
+        static public float MIN_TURN_RADIUS = 30; // meters 
     }
 }

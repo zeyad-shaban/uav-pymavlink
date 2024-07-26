@@ -12,7 +12,7 @@ import clr
 
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
-    MAX_EXECUTE_TIME = 10  # second
+    MAX_EXECUTE_TIME = 20  # second
 
     clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
     from PathFinder.Fundamentals import PayloadPathFinder

@@ -6,10 +6,10 @@ from modules.Camera import Camera
 
 
 if __name__ == "__main__":
-    MISSION_NUMBER = 2
+    MISSION_NUMBER = 1
 
     uav = UAV("./data/Data.json")
-    connectionString = "udpin:192.168.64.1:14550"
+    connectionString = "udpin:172.29.48.1:14550"
     master = mavutil.mavlink_connection(connectionString)
     master.wait_heartbeat()
 
