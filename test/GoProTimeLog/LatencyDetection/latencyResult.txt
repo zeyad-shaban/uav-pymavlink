@@ -1,7 +1,0 @@
-#1: 23006 -> 24012 - difference: 1006ms
-#2: 37014 -> 38016 - difference: 1002ms
-#3: 47022 -> 48028 - difference: 1006ms
-#4: 60004 -> 61010 - difference: 1006ms
-#5: 82004 -> 83010 - difference: 1006ms
-#6: 93005 -> 94008 - difference: 1003ms
-#7: (min: 46024, max: 46028) -> 48000 - difference: (min: 1976ms, max:1972)
