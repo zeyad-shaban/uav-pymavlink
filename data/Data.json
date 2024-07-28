@@ -17,9 +17,9 @@
     "aircraftVelocity": 25,
     "windSpeed": 0,
     "windBearing": 190,
-    "servoNo": 12,
-    "PAYLOAD_OPEN_PWM_VALUE": 2500,
-    "PAYLOAD_CLOSE_PWM_VALUE": 1000,
+    "servoNo": 9,
+    "PAYLOAD_OPEN_PWM_VALUE": 2200,
+    "PAYLOAD_CLOSE_PWM_VALUE": 800,
     "PAYLOAD_ACCEPTANCE_RADIUS": 0
   }
 }

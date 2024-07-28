@@ -6,6 +6,10 @@ COM = "com10"
 PORT = "14550"
 BAUDRATE = "115200"
 
+SWITCH_IP = "192.168.1/24"
+SHOULD_USE_NETWORK = True
+
+
 def get_local_ip():
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
@@ -30,7 +34,7 @@ def scan_network(ip_range):
     return ip_addresses
 
 
-def get_ip_addresses():
+def get_ip_addresses_network():
     local_ip = get_local_ip()
     ip_range = get_ip_range(local_ip)
     ip_addresses = scan_network(ip_range)
@@ -48,14 +52,17 @@ def get_ip_addresses():
     return ip_list
 
 
+def get_ip_addresses_switch():
+    return ["hard code ips here"]
+
+
 def add_mavproxy_output(ip_list):
-    command = f"mavproxy.exe --master={COM} " + " ".join([f"--out=udp:{ip}:{PORT}" for ip in ip_list]) + f" --baudrate={BAUDRATE}"
+    command = f"mavproxy.exe --master={COM} " + " ".join([f"--out=udp:{ip}:{PORT}" for ip in ip_list]) + f" --out=udp:127.0.0.1:{PORT} --baudrate={BAUDRATE}"
+
     subprocess.run(command, shell=True, check=True)
 
 
 # Retrieve IP addresses
-ip_addresses = get_ip_addresses()
-ip_addresses.append('127.0.0.1')
-
+ip_addresses = get_ip_addresses_network() if SHOULD_USE_NETWORK else get_ip_addresses_switch()
 # Add MAVProxy output for each IP address
 add_mavproxy_output(ip_addresses)
