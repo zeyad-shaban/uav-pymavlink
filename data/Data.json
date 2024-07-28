@@ -18,8 +18,8 @@
     "windSpeed": 0,
     "windBearing": 190,
     "servoNo": 9,
-    "PAYLOAD_OPEN_PWM_VALUE": 2200,
-    "PAYLOAD_CLOSE_PWM_VALUE": 800,
+    "PAYLOAD_OPEN_PWM_VALUE": 2150,
+    "PAYLOAD_CLOSE_PWM_VALUE": 850,
     "PAYLOAD_ACCEPTANCE_RADIUS": 0
   }
 }
