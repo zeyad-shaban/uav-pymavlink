@@ -12,7 +12,7 @@ import clr
 
 
 def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payloadRadius: int = 0) -> None:
-    MAX_EXECUTE_TIME = 50  # second
+    MAX_EXECUTE_TIME = 100  # second
 
     clr.AddReference(os.path.join(os.getcwd(), "Algorithms\PathFinder\\PathFinder\\bin\\Release\\PathFinder.dll"))
     from PathFinder.Fundamentals import PayloadPathFinder
@@ -37,7 +37,7 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
     for i, cord in enumerate(wpCords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            cord[0], cord[1], cord[2]))
+            cord[0], cord[1], uav.alt))
 
     # Upload adjusting Wps
     print(f"PID: {os.getpid()}")

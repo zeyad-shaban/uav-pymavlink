@@ -15,7 +15,7 @@ def startMission(uav, master, wpPath, obsPath, fencePath):
     for i, cord in enumerate(wpCords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
-            cord[0], cord[1], cord[2]))
+            cord[0], cord[1], uav.alt))
 
     wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
         master.target_system, master.target_component, i + 1, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_JUMP, 0, 1,

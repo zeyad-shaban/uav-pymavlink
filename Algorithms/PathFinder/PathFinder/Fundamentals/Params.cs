@@ -35,11 +35,11 @@ namespace PathFinder.Fundamentals
     {
 
         public static double H1 = 80; // aircraft altitude
-        public static double Vpa = 25; // aircraft velocity
+        public static double Vpa = 20; // aircraft velocity
         public static double Vag = 0; // windspeed
         public static double angle = 190;// wind bearing
 
         // static public float BANK_ANGLE = 
-        static public float MIN_TURN_RADIUS = 30; // meters 
+        static public float MIN_TURN_RADIUS = 28; // meters 
     }
 }

@@ -14,19 +14,22 @@ def readWaypoints(path: str) -> List[List[float]]:
         firstLine = next(f)
         cords = []
         for line in f:
-            if not line.find(',') == '-1':
-                line = line.replace(' ', ',')
-                line = line.replace('\t', ',')
-                line = re.sub(r',+', ',', line)
+            line = line.replace(' ', ',')
+            line = line.replace('\t', ',')
+            line = re.sub(r',+', ',', line)
 
             if line == '\n':
                 continue
             if firstLine.startswith("n,lat,long"):
-                line = line.split(",")
-                cords.append([float(line[0]), float(line[1]), 0])
-            elif firstLine.startswith('n,lat,long,alt') or firstLine.startswith('n,lat,lon,radius'):
-                line = line.split(",")
-                cords.append([float(line[0]), float(line[1]), float(line[2])])
+                line = line.replace("\n", "").split(",")
+                cords.append([float(line[1]), float(line[2])])
+            elif firstLine.startswith("lat,long"):
+                line = line.replace("\n", "").split(",")
+                cords.append([float(line[0]), float(line[1])])
+
+            # elif firstLine.startswith('n,lat,long,alt') or firstLine.startswith('n,lat,lon,radius'):
+            #     line = line.split(",")
+            #     cords.append([float(line[0]), float(line[1]), float(line[2])])
             elif firstLine.startswith("QGC WPL 110"):
                 line = line.split(',')
                 cords.append([float(line[8]), float(line[9]), float(line[10])])
@@ -49,7 +52,7 @@ def writeMissionPlannerFile(wpCords, path):
                 cmd = 21
 
             f.write("{}\t{}\t{}\t{}\t0.00000000\t0.00000000\t0.00000000\t0.00000000\t{}\t{}\t{}\t1\n".format(
-                i, int(i == 0), 0 if i == 0 else 3, cmd, cord[0], cord[1], cord[2]))
+                i, int(i == 0), 0 if i == 0 else 3, cmd, cord[0], cord[1], 80))
 
 
 def new_waypoint(lat1, long1, d, brng):
@@ -107,14 +110,17 @@ def isPointInFence(lat, lon, fence, extendDistance=0):
 
 
 def addHome(master, wpLoader, uav):
-    if uav.home[0] != 0:
-        return uav.home
+    home = uav.home
 
-    msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
-    home = [msg.lat / 1e7, msg.lon / 1e7]
+    if home[0] == 0:
+        msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+        home = [msg.lat / 1e7, msg.lon / 1e7]
 
     wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-        master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+        master.target_system, master.target_component, 0, 
+        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, 
+        mavutil.mavlink.MAV_CMD_DO_SET_HOME, 
+        0, 1, 0, 0, 0, 0, 
         home[0], home[1], 0))
 
     return home

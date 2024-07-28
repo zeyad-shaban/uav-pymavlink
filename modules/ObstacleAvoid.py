@@ -5,8 +5,10 @@ import math
 safetyMargin = 0
 pointsAroundObs = 1
 
+
 def ObstacleAvoid(uav, wpPath, obsPath):
     wpCords = readWaypoints(wpPath)
+
     obsCords = [] if obsPath is None else readWaypoints(obsPath)
     newWaypoints = []
 
@@ -42,7 +44,7 @@ def ObstacleAvoid(uav, wpPath, obsPath):
 
     if len(obsCords) == 0:
         for i, wp in enumerate(wpCords):
-            newWaypoints.append([wp[0], wp[1], wp[2]])
+            newWaypoints.append([wp[0], wp[1]])
 
     else:
         # combine close obstacles
@@ -55,7 +57,7 @@ def ObstacleAvoid(uav, wpPath, obsPath):
             if abs(distance) <= 30:
                 ObsLat_new, ObsLong_new = new_waypoint(obs[0], obs[1], distance / 2, bearing)
                 # ! TEST THE NEW RADIUS IMPLEMENTATION INSTEAD OF JUST ADDING
-                obsRadius = obs[2] + nextObs[2] # math.sqrt(obs[2]**2 + nextObs[2]**2)
+                obsRadius = obs[2] + nextObs[2]  # math.sqrt(obs[2]**2 + nextObs[2]**2)
                 obsCords[i] = [ObsLat_new, ObsLong_new, obsRadius]
                 del obsCords[i+1]
             else:
@@ -72,5 +74,5 @@ def ObstacleAvoid(uav, wpPath, obsPath):
             newWaypoints.append([latB, longB, altB])
 
     writeMissionPlannerFile(newWaypoints, './data/AVOIDED_WP.waypoints')
-    
+
     return newWaypoints
