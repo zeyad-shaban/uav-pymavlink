@@ -30,8 +30,8 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
 
     uploadFence(master, fencePath)
 
-    # home = addHome(master, wpLoader, uav)
-    # takeoffSequence(master, wpLoader, home, uav)
+    home = addHome(master, wpLoader, uav)
+    takeoffSequence(master, wpLoader, home, uav)
 
     # upload normal mission
     for i, cord in enumerate(wpCords):

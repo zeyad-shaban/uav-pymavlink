@@ -6,7 +6,7 @@ from modules.Camera import Camera
 
 
 if __name__ == "__main__":
-    MISSION_NUMBER = 1
+    MISSION_NUMBER = 2
 
     uav = UAV("./data/Data.json")
     connectionString = "172.29.48.1:14550"
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     if MISSION_NUMBER == 1:
         mission1.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, payloadPath=payloadPath, payloadRadius=10)  # 0 radius means default
     elif MISSION_NUMBER == 2:
-        mission2.startMission(uav, master, sonya6000, surveyAlt=80, surveySpeed=10, surveySquarePath=surveySquare, fencePath=fencePath)
+        mission2.startMission(uav, master, wpPath=wpPath, fencePath=fencePath, obsPath=obsPath, camera=sonya6000, surveyAlt=60, surveySpeed=20, surveySquarePath=surveySquare)
     elif MISSION_NUMBER == 3:
         mission3.startMission(uav, master, wpPath=wpPath, obsPath=obsPath, fencePath=fencePath)
 

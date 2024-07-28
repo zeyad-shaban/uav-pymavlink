@@ -10,22 +10,29 @@ from modules.ImageDetector import openCam, closeCam
 from modules.UAV import UAV
 from modules.Camera import Camera
 
+from modules.ObstacleAvoid import ObstacleAvoid
 # import time
 
 
-def startMission(uav: UAV, master, camera: Camera, surveyAlt: float, surveySpeed: float, surveySquarePath, fencePath) -> None:
+def startMission(uav: UAV, master, wpPath, fencePath, obsPath, camera: Camera, surveyAlt: float, surveySpeed: float, surveySquarePath) -> None:
     camera.adjutSpacingToAlt(surveyAlt)
     wpLoader = mavwp.MAVWPLoader()
 
     uploadFence(master, fencePath)
 
     home = addHome(master, wpLoader, uav)
-    takeoffSequence(master, wpLoader, home, uav)
+    wpCords = ObstacleAvoid(uav, wpPath, obsPath)
+    # takeoffSequence(master, wpLoader, home, uav)
+
+    for i, cord in enumerate(wpCords):
+        wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
+            master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
+            cord[0], cord[1], uav.alt))
 
     recCords = readWaypoints(surveySquarePath)
     searchRec = RectPoints(*recCords)
 
-    cords = generateSurveyFromRect(searchRec, camera.spacing, home)
+    cords = generateSurveyFromRect(searchRec, camera.spacing, wpCords[-1])
     for i, cord in enumerate(cords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
             master.target_system, master.target_component, i+2, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,

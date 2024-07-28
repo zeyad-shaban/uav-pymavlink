@@ -157,3 +157,9 @@ def landingSequence(master, wpLoader, home, uav: UAV):
             master.target_system, master.target_component, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_LAND, 0, 1, 0, 0, 0, 0,
             home[0], home[1], 0)
     )
+
+def Obstacle_Coordinates_Radius(index, listname):
+    i = listname[index]
+    if i['radius'] == None:
+        i['radius'] = 5
+    return i['n'], i['lat'], i['long'], i['radius'] #lat[0] long[1] radius[2]
