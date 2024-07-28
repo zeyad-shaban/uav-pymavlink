@@ -11,7 +11,7 @@ R = 6371000.0  # Earth radius in meters
 
 def readWaypoints(path: str) -> List[List[float]]:
     with open(path) as f:
-        firstLine = next(f)
+        firstLine = next(f).replace("\n", "")
         cords = []
         for line in f:
             line = line.replace(' ', ',')
@@ -20,16 +20,21 @@ def readWaypoints(path: str) -> List[List[float]]:
 
             if line == '\n':
                 continue
-            if firstLine.startswith("n,lat,long"):
-                line = line.replace("\n", "").split(",")
+            line = line.replace("\n", "").split(",")
+
+            # normal waypoint
+            if firstLine == "n,lat,long":
                 cords.append([float(line[1]), float(line[2])])
-            elif firstLine.startswith("lat,long"):
-                line = line.replace("\n", "").split(",")
+            elif firstLine == "lat,long":
                 cords.append([float(line[0]), float(line[1])])
 
-            # elif firstLine.startswith('n,lat,long,alt') or firstLine.startswith('n,lat,lon,radius'):
-            #     line = line.split(",")
-            #     cords.append([float(line[0]), float(line[1]), float(line[2])])
+            # obstacles
+            elif firstLine == "n,lat,long,rad":
+                cords.append([float(line[1]), float(line[2]), float(line[3])])
+
+            elif firstLine == "lat,long,rad":
+                cords.append([float(line[0]), float(line[1]), float(line[2])])
+
             elif firstLine.startswith("QGC WPL 110"):
                 line = line.split(',')
                 cords.append([float(line[8]), float(line[9]), float(line[10])])
@@ -117,10 +122,10 @@ def addHome(master, wpLoader, uav):
         home = [msg.lat / 1e7, msg.lon / 1e7]
 
     wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
-        master.target_system, master.target_component, 0, 
-        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, 
-        mavutil.mavlink.MAV_CMD_DO_SET_HOME, 
-        0, 1, 0, 0, 0, 0, 
+        master.target_system, master.target_component, 0,
+        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,
+        mavutil.mavlink.MAV_CMD_DO_SET_HOME,
+        0, 1, 0, 0, 0, 0,
         home[0], home[1], 0))
 
     return home

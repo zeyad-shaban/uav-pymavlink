@@ -13,7 +13,7 @@ def ObstacleAvoid(uav, wpPath, obsPath):
     newWaypoints = []
 
     def add_avoid_waypoint(latA, longA, altA, latB, longB, altB, obsLat, obsLong, obsRad, obsBearing, execludeObsI):
-        dObs = obsRad * uav.safe_dist
+        dObs = obsRad + uav.safe_dist
 
         latNew, longNew = new_waypoint(obsLat, obsLong, dObs, obsBearing)
         check_obstacles(latA, longA, altA, latNew, longNew, altA, execludeObsI)
@@ -65,8 +65,8 @@ def ObstacleAvoid(uav, wpPath, obsPath):
 
         for i, wp in enumerate(wpCords[:-1]):
             nextWp = wpCords[i+1]
-            latA, longA, altA = wp[0], wp[1], wp[2]
-            latB, longB, altB = nextWp[0], nextWp[1], nextWp[2]
+            latA, longA, altA = wp[0], wp[1], uav.alt
+            latB, longB, altB = nextWp[0], nextWp[1], uav.alt
 
             newWaypoints.append([latA, longA, altA])
             check_obstacles(latA, longA, altA, latB, longB, altB, None)

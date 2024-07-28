@@ -4,7 +4,7 @@
   "altitude": 80,
   "takeOffAngle": 8.5,
   "takeOffAlt": 45,
-  "obsAvoidSafeDistance": 10,
+  "obsAvoidSafeDistance": 0,
   "Files": {
     "fenceFile": "Geofence",
     "waypointsFile": "Waypoints",
