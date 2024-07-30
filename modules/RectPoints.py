@@ -26,12 +26,12 @@ class RectPoints:
 
     def getClosestPoint(self, location: List[float]) -> List[float]:
         closestPoint = self.topLeft
-        closestDistance = getDistance2Points(*self.topLeft, *location)
+        closestDistance = getDistance2Points(self.topLeft[0], self.topLeft[1], location[0], location[1])
 
         points = [self.topRight, self.bottomRight, self.bottomLeft]
 
         for point in points:
-            distanceToPoint = getDistance2Points(*point, *location)
+            distanceToPoint = getDistance2Points(point[0], point[1], location[0], location[1])
             if distanceToPoint < closestDistance:
                 closestPoint = point
                 closestDistance = distanceToPoint

@@ -22,7 +22,7 @@ def startMission(uav: UAV, master, wpPath, fencePath, obsPath, camera: Camera, s
 
     home = addHome(master, wpLoader, uav)
     wpCords = ObstacleAvoid(uav, wpPath, obsPath)
-    # takeoffSequence(master, wpLoader, home, uav)
+    takeoffSequence(master, wpLoader, home, uav)
 
     for i, cord in enumerate(wpCords):
         wpLoader.add(mavutil.mavlink.MAVLink_mission_item_message(
@@ -60,17 +60,17 @@ def startMission(uav: UAV, master, wpPath, fencePath, obsPath, camera: Camera, s
         msg = master.recv_match(type='MISSION_REQUEST', blocking=True)
         master.mav.send(wpLoader.wp(msg.seq))
 
-    # didOpenCam = False
-    # didCloseCam = False
-    # while True:
-    #     msg = master.recv_match(type='MISSION_ITEM_REACHED', blocking=True)
-    #     if msg.seq >= 2 and not didOpenCam:
-    #         openCam()
-    #         didOpenCam = True
-    #     elif msg.seq > len(cords) + 1 and not didCloseCam:
-    #         closeCam()
-    #         didCloseCam = True
-    #         break
+    didOpenCam = False
+    didCloseCam = False
+    while True:
+        msg = master.recv_match(type='MISSION_ITEM_REACHED', blocking=True)
+        if msg.seq >= 2 and not didOpenCam:
+            openCam()
+            didOpenCam = True
+        elif msg.seq > len(cords) + 1 and not didCloseCam:
+            closeCam()
+            didCloseCam = True
+            break
 
 
 def generateSurveyFromRect(rec: RectPoints, spacing, planeLocation) -> List[List[float]]:

@@ -1,6 +1,55 @@
 # TODO TEST
 from modules.utils import getDistance2Points, getBearing2Points, new_waypoint, writeMissionPlannerFile, readWaypoints
 import math
+from geopy.distance import geodesic
+import numpy as np
+
+def haversine(lat1, lon1, lat2, lon2):
+    # Calculate the great-circle distance between two points on the Earth's surface.
+    R = 6371000  # Earth radius in meters
+    phi1 = np.radians(lat1)
+    phi2 = np.radians(lat2)
+    delta_phi = np.radians(lat2 - lat1)
+    delta_lambda = np.radians(lon2 - lon1)
+    a = np.sin(delta_phi / 2.0) ** 2 + np.cos(phi1) * np.cos(phi2) * np.sin(delta_lambda / 2.0) ** 2
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+    return R * c
+
+def is_obstacle_between(pointA, pointB, obstacle, radius):
+    # Extract coordinates
+    pointA_lat, pointA_long = pointA
+    pointB_lat, pointB_long = pointB
+    obstacle_lat, obstacle_long = obstacle
+
+    # Convert coordinates to Cartesian (X, Y) for easier calculations
+    def latlon_to_xy(lat, lon):
+        return (lat, lon)
+    
+    Ax, Ay = latlon_to_xy(pointA_lat, pointA_long)
+    Bx, By = latlon_to_xy(pointB_lat, pointB_long)
+    Ox, Oy = latlon_to_xy(obstacle_lat, obstacle_long)
+
+    # Vector AB and AO
+    AB = np.array([Bx - Ax, By - Ay])
+    AO = np.array([Ox - Ax, Oy - Ay])
+    
+    # Project AO onto AB to find the closest point on the line segment
+    AB_squared = np.dot(AB, AB)
+    if AB_squared == 0:
+        return False  # A and B are the same point
+    
+    AO_dot_AB = np.dot(AO, AB)
+    t = AO_dot_AB / AB_squared
+    t = max(0, min(1, t))  # Clamp t to the range [0, 1]
+
+    # Find the projection point
+    projection = np.array([Ax, Ay]) + t * AB
+
+    # Distance from the obstacle to the projection point
+    distance_to_obstacle = haversine(projection[0], projection[1], obstacle_lat, obstacle_long)
+
+    return distance_to_obstacle <= radius
+
 
 safetyMargin = 0
 pointsAroundObs = 1
@@ -16,9 +65,9 @@ def ObstacleAvoid(uav, wpPath, obsPath):
         dObs = obsRad + uav.safe_dist
 
         latNew, longNew = new_waypoint(obsLat, obsLong, dObs, obsBearing)
-        check_obstacles(latA, longA, altA, latNew, longNew, altA, execludeObsI)
+        # check_obstacles(latA, longA, altA, latNew, longNew, altA, execludeObsI)
         newWaypoints.append([latNew, longNew, altA])
-        check_obstacles(latNew, longNew, altA, latB, longB, altB, execludeObsI)
+        # check_obstacles(latNew, longNew, altA, latB, longB, altB, execludeObsI)
 
     def check_obstacles(latA, longA, altA, latB, longB, altB, execludeObsI):
         for i, obs in enumerate(obsCords):
@@ -26,6 +75,8 @@ def ObstacleAvoid(uav, wpPath, obsPath):
                 continue
 
             ObsLat, ObsLong, ObsRad = obs
+
+            is_obstacle_between([latA, longA], [latB, longB], [ObsLat, ObsLong], ObsRad + uav.safe_dist)
             distance_a_b = getDistance2Points(latA, longA, latB, longB)
             distance_a_obs = getDistance2Points(latA, longA, ObsLat, ObsLong)
             bearing_a_obs = getBearing2Points(latA, longA, ObsLat, ObsLong)
@@ -37,9 +88,8 @@ def ObstacleAvoid(uav, wpPath, obsPath):
             else:
                 brng = bearing_a_obs - bearing_a_b
 
-            L = distance_a_obs * math.sin(brng*(math.pi/180))
-
-            if not ((brng <= 270 and brng >= 90) or (L >= (uav.safe_dist * ObsRad)) or (distance_a_obs > distance_a_b)):
+            obsAffects = is_obstacle_between([latA, longA], [latB, longB], [ObsLat, ObsLong], ObsRad + uav.safe_dist)
+            if (obsAffects):
                 add_avoid_waypoint(latA, longA, altA, latB, longB, altB, ObsLat, ObsLong, ObsRad, bearingObs, i)
 
     if len(obsCords) == 0:
@@ -63,12 +113,13 @@ def ObstacleAvoid(uav, wpPath, obsPath):
             else:
                 i += 1
 
+        firstWp = wpCords[0]
+        newWaypoints.append([firstWp[0], firstWp[1], uav.alt])
         for i, wp in enumerate(wpCords[:-1]):
             nextWp = wpCords[i+1]
             latA, longA, altA = wp[0], wp[1], uav.alt
             latB, longB, altB = nextWp[0], nextWp[1], uav.alt
 
-            newWaypoints.append([latA, longA, altA])
             check_obstacles(latA, longA, altA, latB, longB, altB, None)
 
             newWaypoints.append([latB, longB, altB])
