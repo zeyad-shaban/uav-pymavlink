@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PathFinder.Fundamentals
 {
-    public class Waypoint
+public class Waypoint
     {
         private static Dictionary<int, Waypoint> savedDropCords = new Dictionary<int, Waypoint>();
         public double Lat;
