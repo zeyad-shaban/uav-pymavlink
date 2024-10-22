@@ -3,7 +3,7 @@ import glob
 from typing import List
 import math
 from pymavlink import mavutil, mavwp
-from modules.utils import addHome, takeoffSequence, landingSequence, readWaypoints, getBearing2Points, new_waypoint, getDistance2Points
+from modules.utils import addHome, takeoffSequence, landingSequence, read_waypoints, getBearing2Points, new_waypoint, getDistance2Points
 from modules.Fence import uploadFence
 from modules.RectPoints import RectPoints
 from modules.ImageDetector import openCam, closeCam
@@ -29,7 +29,7 @@ def startMission(uav: UAV, master, wpPath, fencePath, obsPath, camera: Camera, s
             master.target_system, master.target_component, i, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0,
             cord[0], cord[1], uav.alt))
 
-    recCords = readWaypoints(surveySquarePath)
+    recCords = read_waypoints(surveySquarePath)
     searchRec = RectPoints(*recCords)
 
     cords = generateSurveyFromRect(searchRec, camera.spacing, wpCords[-1])

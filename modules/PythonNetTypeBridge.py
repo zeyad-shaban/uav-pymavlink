@@ -19,7 +19,7 @@ _MAP_NP_NET = {
     np.dtype(np.uint16): System.UInt16,
     np.dtype(np.uint32): System.UInt32,
     np.dtype(np.uint64): System.UInt64,
-    np.dtype(np.bool): System.Boolean,
+    np.dtype(np.bool_): System.Boolean,
 }
 _MAP_NET_NP = {
     'Single': np.dtype(np.float32),
@@ -32,7 +32,7 @@ _MAP_NET_NP = {
     'UInt16': np.dtype(np.uint16),
     'UInt32': np.dtype(np.uint32),
     'UInt64': np.dtype(np.uint64),
-    'Boolean': np.dtype(np.bool),
+    'Boolean': np.dtype(np.bool_),
 }
 
 

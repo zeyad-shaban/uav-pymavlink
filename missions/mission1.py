@@ -1,5 +1,5 @@
 from pymavlink import mavutil, mavwp
-from modules.utils import new_waypoint, readWaypoints, addHome, takeoffSequence, landingSequence, getBearing2Points, isPointInFence, getDistance2Points
+from modules.utils import new_waypoint, read_waypoints, addHome, takeoffSequence, landingSequence, getBearing2Points, isPointInFence, getDistance2Points
 from modules.ObstacleAvoid import ObstacleAvoid
 from modules.UAV import UAV
 from modules.Fence import uploadFence
@@ -20,13 +20,13 @@ def startMission(uav: UAV, master, wpPath, obsPath, fencePath, payloadPath, payl
     wpLoader = mavwp.MAVWPLoader()
 
     wpCords = ObstacleAvoid(uav, wpPath, obsPath)
-    obsCords = [] if obsPath is None else readWaypoints(obsPath)
+    obsCords = [] if obsPath is None else read_waypoints(obsPath)
 
-    targetCord = readWaypoints(payloadPath)[0]
+    targetCord = read_waypoints(payloadPath)[0]
     lastWp = wpCords[len(wpCords) - 1]
     beforeLastWp = wpCords[len(wpCords) - 2]
 
-    fenceCords = readWaypoints(fencePath)
+    fenceCords = read_waypoints(fencePath)
 
     uploadFence(master, fencePath)
 

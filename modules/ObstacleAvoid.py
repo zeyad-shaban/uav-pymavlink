@@ -1,7 +1,6 @@
 # TODO TEST
-from modules.utils import getDistance2Points, getBearing2Points, new_waypoint, writeMissionPlannerFile, readWaypoints
+from modules.utils import getDistance2Points, getBearing2Points, new_waypoint, read_waypoints
 import math
-from geopy.distance import geodesic
 import numpy as np
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -56,9 +55,9 @@ pointsAroundObs = 1
 
 
 def ObstacleAvoid(uav, wpPath, obsPath):
-    wpCords = readWaypoints(wpPath)
+    wpCords = read_waypoints(wpPath)
 
-    obsCords = [] if obsPath is None else readWaypoints(obsPath)
+    obsCords = [] if obsPath is None else read_waypoints(obsPath)
     newWaypoints = []
 
     def add_avoid_waypoint(latA, longA, altA, latB, longB, altB, obsLat, obsLong, obsRad, obsBearing, execludeObsI):
@@ -123,7 +122,5 @@ def ObstacleAvoid(uav, wpPath, obsPath):
             check_obstacles(latA, longA, altA, latB, longB, altB, None)
 
             newWaypoints.append([latB, longB, altB])
-
-    writeMissionPlannerFile(newWaypoints, './data/AVOIDED_WP.waypoints')
 
     return newWaypoints

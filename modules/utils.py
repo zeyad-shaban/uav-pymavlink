@@ -9,9 +9,9 @@ import re
 R = 6371000.0  # Earth radius in meters
 
 
-def readWaypoints(path: str) -> List[List[float]]:
+def read_waypoints(path: str) -> List[List[float]]:
     with open(path) as f:
-        firstLine = next(f).replace("\n", "")
+        first_line = next(f).replace("\n", "")
         cords = []
         for line in f:
             line = line.replace(' ', ',')
@@ -23,37 +23,37 @@ def readWaypoints(path: str) -> List[List[float]]:
             line = line.replace("\n", "").split(",")
 
             # normal waypoint
-            if firstLine == "n,lat,long":
+            if first_line == "n,lat,long":
                 cords.append([float(line[1]), float(line[2])])
-            elif firstLine == "lat,long":
+            elif first_line == "lat,long":
                 cords.append([float(line[0]), float(line[1])])
 
             # obstacles
-            elif firstLine == "n,lat,long,rad":
+            elif first_line == "n,lat,long,rad":
                 cords.append([float(line[1]), float(line[2]), float(line[3])])
 
-            elif firstLine == "lat,long,rad":
+            elif first_line == "lat,long,rad":
                 cords.append([float(line[0]), float(line[1]), float(line[2])])
 
-            elif firstLine.startswith("QGC WPL 110"):
+            elif first_line.startswith("QGC WPL 110"):
                 line = line.split(',')
                 cords.append([float(line[8]), float(line[9]), float(line[10])])
 
             else:
-                print(f'!!!!!!"FILE FORMAT NOT SUPPORTED {firstLine}!!!!!!!!!!!')
+                print(f'!!!!!!"FILE FORMAT NOT SUPPORTED {first_line}!!!!!!!!!!!')
                 return []
 
         return cords
 
 
-def writeMissionPlannerFile(wpCords, path):
+def write_mission_planner_file(wp_cords, path):
     with open(path, 'w') as f:
         f.write("QGC WPL 110\n")
-        for i, cord in enumerate(wpCords):
+        for i, cord in enumerate(wp_cords):
             cmd = 16
             if i == 1:
                 cmd = 22
-            elif i == len(wpCords) - 1:
+            elif i == len(wp_cords) - 1:
                 cmd = 21
 
             f.write("{}\t{}\t{}\t{}\t0.00000000\t0.00000000\t0.00000000\t0.00000000\t{}\t{}\t{}\t1\n".format(
