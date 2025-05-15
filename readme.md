@@ -7,11 +7,4 @@ It was built in C# for maximum efficiency
 Install the needed libraries with `pip install -r requirements.txt`
 To run the app open main.py, import the mission you want to run from missions directory, then run the start function of it
 
-<iframe
-  width="560"
-  height="315"
-  src="[https://www.youtube.com/embed/VIDEO_ID](https://youtu.be/xeptdRSnpZw)"
-  frameborder="0"
-  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-  allowfullscreen
-></iframe>
+[![Watch on YouTube](https://img.youtube.com/vi/xeptdRSnpZw/0.jpg)](https://youtu.be/xeptdRSnpZw)
