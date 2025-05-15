@@ -1,11 +1,17 @@
-Ensure to install ghostscript, needed only for pdf reading
+This project was made for Roben UAV team for year 2024, this script is now outdated and no longer what we use in our system that's why i posted it public
 
+It had a Genetic Algorithm based path finder built in to find the best path for the plane to follow to throw the payload while being the shortest route, with respect to the turning capabilities of the plane, and not exceeding the fence
+
+It was built in C# for maximum efficiency
 
 Install the needed libraries with `pip install -r requirements.txt`
 To run the app open main.py, import the mission you want to run from missions directory, then run the start function of it
 
-##TODO List:
-- mission 1 configure how to reload the payload and how to launch it again (needs understanding of how the competition stuff works overall)
-- mission 2 ai needs to implement image recognition, and they should make it so that the same flag wont' get captured multiple times, and they should return x,y in a list directly after capturing anything
-!!!MISSION 2: USE THIS AND HANDLE SAVING THE PLANE CORDS TO KNOW WHERE THE PLANE IS LOCATED
-
+<iframe
+  width="560"
+  height="315"
+  src="[https://www.youtube.com/embed/VIDEO_ID](https://youtu.be/xeptdRSnpZw)"
+  frameborder="0"
+  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen
+></iframe>
